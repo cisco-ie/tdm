@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block page_header %}Classic Search{% endblock %}
+
+{% block head_includes %}
+<script>
+
+var endpointMap = {
+    "search": "{{ url_for('search_api') }}"
+};
+
+window.addEventListener("load", function() {
+    var form = document.getElementById("search-form");
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        fetchSearch(form);
+    });
+    form.addEventListener("change", function(event) {
+        var sourceElement = event.target || event.srcElement;
+        var sourceElementId = event.id;
+        if (sourceElementId != "submit") {
+            document.getElementById("start_index").value = 0;
+        }
+    });
+});
+
+function fetchSearch(form) {
+    var searchLoader = "search-loader";
+    var searchEndpoint = endpointMap["search"];
+    toggleLoading(searchLoader);
+    document.getElementById("submit").classList.toggle("disabled");
+    postForm(searchEndpoint, form).then(response => response.json())
+    .catch(error => console.error("Error:", error))
+    .then(function(response) {
+        updateSearchResults(response);
+        document.getElementById("start_index").value = parseInt(document.getElementById("start_index").value) + parseInt(document.getElementById("max_return_count").value);
+    }).finally(function() {
+        toggleLoading(searchLoader);
+        document.getElementById("submit").classList.toggle("disabled");
+    }, searchLoader);
+}
+
+function updateSearchResults(response) {
+    var outputArea = document.getElementById("search-output");
+    var outputHTML = "";
+    for (var osName in response) {
+        var osReleases = response[osName];
+        for (var releaseName in osReleases) {
+            var releaseDataModelLanguages = osReleases[releaseName];
+            for (var dataModelLanguage in releaseDataModelLanguages) {
+                var releaseDataModels = releaseDataModelLanguages[dataModelLanguage];
+                for (var dataModel in releaseDataModels) {
+                    var modelDataPaths = releaseDataModels[dataModel];
+                    if (modelDataPaths.length === 0)
+                        continue;
+                    outputHTML += "<div class=\"section\">";
+                    outputHTML += "<div class=\"panel panel--dkgray panel--compressed base-margin-top\">";
+                    outputHTML += "<span class=\"label label--large label--ltgray\">" + osName + "</span>";
+                    outputHTML += "<span class=\"label label--large label--ltgray\">" + releaseName + "</span>";
+                    outputHTML += "<span class=\"label label--large label--ltgray\">" + dataModelLanguage + "</span>";
+                    outputHTML += "<span class=\"label label--large label--ltgray\">" + dataModel + "</span>";
+                    outputHTML += "</div>";
+                    outputHTML += "<ul class=\"list\">";
+                    for (let dataPath of modelDataPaths) {
+                        outputHTML += "<li><div class=\"panel panel--bordered\"><a target=\"_blank\" href=\"/datapath/view/" + dataPath["_key"] + "\">" + dataPath["human_id"] + "</a></div></li>";
+                    }
+                    outputHTML += "</ul></div>";
+                }
+            }
+        }
+    }
+    outputArea.innerHTML = outputHTML;
+}
+
+function toggleLoading(loadingId, loadingClasses = ["loading-dots", "loading-dots--info"]) {
+    var element = document.getElementById(loadingId);
+    for (let className of loadingClasses)
+        element.classList.toggle(className);
+}
+
+function postForm(endpoint, form) {
+    // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+    return fetch(endpoint, {
+        body: new URLSearchParams(new FormData(form)),
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: {
+            "content-type": "application/x-www-form-urlencoded"
+        },
+        method: "POST",
+        mode: "cors",
+        redirect: "follow",
+        referrer: "no-referrer"
+    });
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 panel-group">
+        <div class="panel panel--bordered">
+            <div>
+                <p>Search TDM for Data Paths. <strong>DEPRECATED</strong> due to heavy resource usage. <strong>Please do not use this.</strong></p>
+            </div>
+            <div class="divider divider--accent-blue"></div>
+            <div>
+                <form id="search-form" method="POST">
+                    {{ search_form.hidden_tag() }}
+                    <p><strong>{{ search_form.oses.label.text }}</strong></p>
+                    <div class="form-group">
+                        {% for option in search_form.oses.choices %}
+                        <label class="checkbox">
+                            <input type="checkbox" name="oses" value="{{ option[0] }}">
+                            <span class="checkbox__input"></span>
+                            <span class="checkbox__label">{{ option[1] }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <p><strong>{{ search_form.dmls.label.text }}</strong></p>
+                    <div class="form-group">
+                        {% for option in search_form.dmls.choices %}
+                        <label class="checkbox">
+                            <input type="checkbox" name="dmls" value="{{ option[0] }}">
+                            <span class="checkbox__input"></span>
+                            <span class="checkbox__label">{{ option[1] }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group">
+                        <label class="switch switch--small">
+                            {{ search_form.exclude_config }}
+                            <span class="switch__label">{{ search_form.exclude_config.label.text }}</span>
+                            <span class="switch__input"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="switch switch--small">
+                            {{ search_form.only_leaves }}
+                            <span class="switch__label">{{ search_form.only_leaves.label.text }}</span>
+                            <span class="switch__input"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-group__text">
+                            {{ search_form.filter_str.label }}
+                            {{ search_form.filter_str(type='search') }}
+                            <button type="button" class="link">
+                                <span class="icon-search"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-group__text">
+                            {{ search_form.start_index.label }}
+                            {{ search_form.start_index(type="number") }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-group__text">
+                            {{ search_form.max_return_count.label }}
+                            {{ search_form.max_return_count(type="number") }}
+                        </div>
+                    </div>
+                    {{ search_form.submit(class_="btn btn--primary") }}
+                </form>
+            </div>
+        </div>
+        <div class="panel panel--bordered">
+            <div id="search-loader"><span></span><span></span><span></span></div>
+            <div id="search-output" class="panel">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

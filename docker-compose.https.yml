@@ -1,0 +1,124 @@
+version: "3.5"
+
+networks:
+  backend:
+
+volumes:
+  dbms_storage:
+  nginx_logs:
+  goaccess_report:
+  search_storage:
+
+secrets:
+  ssl_cert:
+    file: ./nginx/tdm.cisco.com.crt
+  ssl_key:
+    file: ./nginx/tdm.cisco.com.key
+
+services:
+  dbms:
+    image: arangodb/arangodb:latest
+    volumes:
+      - type: volume
+        source: dbms_storage
+        target: /var/lib/arangodb3
+        volume:
+          nocopy: true
+    expose:
+      - "8529"
+    environment:
+      - ARANGO_ROOT_PASSWORD=tdm
+    networks:
+      - backend
+  etl:
+    image: tdm/etl
+    volumes:
+      - type: bind
+        source: ./etl/cache/extract
+        target: /data/extract
+      - type: bind
+        source: ./etl/cache/transform
+        target: /data/transform
+    networks:
+      - backend
+  web:
+    image: tdm/web
+    expose:
+      - "80"
+    environment:
+      - FLASK_ENV=production
+    networks:
+      - backend
+  nginx:
+    image: nginx:alpine
+    ports:
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+      - target: 8529
+        published: 8529
+        protocol: tcp
+        mode: host
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 5601
+        published: 5601
+        protocol: tcp
+        mode: host
+    networks:
+      - backend
+    volumes:
+      - type: volume
+        source: nginx_logs
+        target: /var/log/nginx
+      - type: volume
+        source: goaccess_report
+        target: /srv/goaccess
+        read_only: true
+      - "./nginx/nginx.https.conf:/etc/nginx/nginx.conf:ro"
+    secrets:
+      - source: ssl_cert
+        target: tdm.cisco.com.crt
+      - source: ssl_key
+        target: tdm.cisco.com.key
+  goaccess:
+    image: allinurl/goaccess:latest
+    command: sh -c "while true; do goaccess --no-global-config --config-file=/srv/data/web.conf && goaccess --no-global-config --config-file=/srv/data/dbms.conf && goaccess --no-global-config --config-file=/srv/data/kibana.conf; sleep 60; done"
+    networks:
+      - backend
+    volumes:
+      - type: volume
+        source: nginx_logs
+        target: /srv/logs
+        read_only: true
+      - type: volume
+        source: goaccess_report
+        target: /srv/report
+      - "./nginx/goaccess_web.conf:/srv/data/web.conf:ro"
+      - "./nginx/goaccess_dbms.conf:/srv/data/dbms.conf:ro"
+      - "./nginx/goaccess_kibana.conf:/srv/data/kibana.conf:ro"
+  search:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.0
+    environment:
+      - cluster.name=tdm
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - backend
+    volumes:
+      - type: volume
+        source: search_storage
+        target: /usr/share/elasticsearch/data
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.4.0
+    environment:
+      ELASTICSEARCH_URL: http://search:9200
+    networks:
+      - backend

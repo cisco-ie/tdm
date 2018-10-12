@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block page_header %}Index{% endblock %}
+
+{% block head_includes %}
+<script>
+    window.addEventListener("load", function() {
+        var collections = ["DataPath", "Release", "DataModel"];
+        fetch("{{ url_for('collection_counts') }}", {
+            body: JSON.stringify(collections),
+            credentials: "same-origin",
+            headers: {
+                "content-type": "application/json"
+            },
+            method: "POST",
+            mode: "cors",
+            redirect: "follow",
+            referrer: "no-referrer"
+        }).then(response => response.json())
+        .catch(error => console.error("Error:", error))
+        .then(function(response) {
+            for (var collectionName in response) {
+                var collectionSize = response[collectionName];
+                document.getElementById(collectionName).innerHTML = collectionSize;
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="hero hero--loose hero--split hero--split-66">
+        <div class="hero__content hero--indigo">
+            <div class="container">
+                <h3>Your cornerstone for telemetry.</h3>
+                <p>Data points across protocols are parsed from modeled APIs to create an immutable view of data availability, and mapping capabilities allow for humans or machines to indicate equivalencies e.g. from a NETCONF YANG XPath to an SNMP MIB OID. Search and other functionality is provided as a useful side-effect of these goals. Enjoy!</p>
+            </div>
+        </div>
+        <div class="hero__marquee hero--background-3 hero--filter-blue"></div>
+    </div>
+</div>
+<div class="section">
+    <h1 class="section__title">Statistics</h1>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="scoreboard">
+                    <div id="Release" class="scoreboard__title">
+                        <div class="loading-dots loading-dots--info"><span></span><span></span><span></span></div>
+                    </div>
+                    <hr class="text-muted">
+                    <div class="scoreboard__subtitle">OS Releases</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="scoreboard">
+                    <div id="DataModel" class="scoreboard__title">
+                        <div class="loading-dots loading-dots--info"><span></span><span></span><span></span></div>
+                    </div>
+                    <hr class="text-muted">
+                    <div class="scoreboard__subtitle">Data Models</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="scoreboard">
+                    <div id="DataPath" class="scoreboard__title">
+                        <div class="loading-dots loading-dots--info"><span></span><span></span><span></span></div>
+                    </div>
+                    <hr class="text-muted">
+                    <div class="scoreboard__subtitle">Data Paths</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

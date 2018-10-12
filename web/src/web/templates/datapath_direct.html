@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block page_header %}DataPath Direct{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 panel-group">
+        <div class="panel panel--bordered">
+            <div>
+                <p>Input a DataPath human or machine ID and navigate directly to its corresponding detail page!</p>
+            </div>
+            <div class="divider divider--accent-blue"></div>
+            <div>
+                <form id="direct-form" method="POST">
+                    {{ direct_form.hidden_tag() }}
+                    <div class="form-group">
+                        <div class="form-group__text">
+                            {{ direct_form.path_id.label }}
+                            {{ direct_form.path_id(type='search') }}
+                            <button type="button" class="link">
+                                <span class="icon-search"></span>
+                            </button>
+                        </div>
+                    </div>
+                    {{ direct_form.submit(class_="btn btn--primary") }}
+                </form>
+            </div>
+        </div>
+        {% if multi_paths %}
+        <div class="panel panel--bordered">
+            <p>Multiple potential DataPaths! Be more specific.</p>
+            <table class="responsive-table">
+                <tbody>
+                    {% for datapath in multi_paths %}
+                    <tr>
+                        <td><a href="{{ url_for('datapath_details', _key=datapath['_key']) }}" target="_blank">{{ datapath['machine_id'] }}</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

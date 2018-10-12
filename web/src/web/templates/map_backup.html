@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block page_header %}Mapping Backup{% endblock %}
+
+{% block head_includes %}
+<script>
+
+
+var endpointMap = {
+    "apiMapLoadNative": "{{ url_for('api_map_load_native') }}"
+};
+
+// Check for the various File API support.
+if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
+    alert('The File APIs are required for this functionality.');
+}
+
+window.addEventListener('load', function() {
+    document.getElementById('restore').addEventListener('click', function() {
+        document.getElementById('restoreFile').click();
+    });
+    document.getElementById('restoreFile').addEventListener(
+        'change', function(event) {
+            event.preventDefault();
+            console.debug('Restore file changed!');
+            restoreMappings(document.getElementById('restoreFile').files[0]);
+        }
+    );
+});
+
+function restoreMappings(restoreFile) {
+    setLoading();
+    var data = new FormData();
+    data.append('file', restoreFile);
+    fetch(
+        endpointMap['apiMapLoadNative'],
+        {
+            method: 'POST',
+            cache: 'no-cache',
+            body: data
+        }
+    ).then(response => response.json())
+    .then(response => setStatusDisplay(response))
+    .catch(error => function(error) {
+        console.error(error);
+        setErrorDisplay(error);
+    });
+}
+
+function setErrorDisplay(error) {
+    var outputPanel = document.getElementById('output-panel');
+    clearElementChildren(outputPanel);
+    var alertDiv = genElement('div', ['alert', 'alert--danger']);
+    alertDiv.appendChild(
+        genElement('div', ['alert__icon icon-error'])
+    );
+    alertDiv.appendChild(
+        genElement('div', ['alert__message'], document.createTextNode(error))
+    );
+    outputPanel.appendChild(alertDiv);
+}
+
+function setStatusDisplay(response) {
+    var outputPanel = document.getElementById('output-panel');
+    clearElementChildren(outputPanel);
+    outputPanel.appendChild(
+        genElement('h4', null, document.createTextNode('Failures'))
+    );
+    outputPanel.appendChild(
+        genElement('div', ['divider', 'divider--accent-blue'])
+    );
+    for (key in response) {
+        var schema = [];
+        var schemaDisplayText = [];
+        if (key == 'DataPathMatch') {
+            schema.push('message', '_from', '_to');
+            schemaDisplayText.push('Error', 'First DataPath', 'SecondDataPath');
+        } else if (key == 'Calculation') {
+            schema.push('message', 'name', 'InCalculation', 'CalculationResult');
+            schemaDisplayText.push('Error', 'Calculation Name', 'In Calculation', 'Calculation Result');
+        }
+        outputPanel.appendChild(
+            genPanelTable(key, schema, schemaDisplayText, response[key])
+        );
+    }
+    console.info('Finished loading response display.');
+}
+
+function genPanelTable(key, schema, schemaDisplayText, elements) {
+    var outputPanel = genElement('div', ['panel', 'panel--bordered']);
+    outputPanel.appendChild(
+        genElement('h6', null, document.createTextNode(key))
+    );
+    var outputTable = genElement('table', ['table']);
+    var tableHeaderRow = document.createElement('tr');
+    for (var text of schemaDisplayText) {
+        tableHeaderRow.appendChild(
+            genElement('th', null, document.createTextNode(text))
+        );
+    }
+    outputTable.appendChild(
+        genElement('thead', null, tableHeaderRow)
+    );
+    var tableBody = document.createElement('tbody');
+    for (var element of elements) {
+        var tableRow = document.createElement('tr');
+        for (var schemaKey of schema) {
+            var schemaTd = document.createElement('td');
+            var content = element[schemaKey];
+            if (Array.isArray(content) != true) {
+                schemaTd.appendChild(document.createTextNode(content));
+            } else {
+                content.forEach(function(val, idx) {
+                    schemaTd.appendChild(document.createTextNode(val));
+                    if (idx < content.length - 1) {
+                        schemaTd.appendChild(document.createElement('br'));
+                    }
+                });
+            }
+            tableRow.appendChild(schemaTd);
+        }
+        tableBody.appendChild(tableRow);
+    }
+    outputTable.appendChild(tableBody);
+    outputPanel.appendChild(
+        genElement('div', ['responsive-table'], outputTable)
+    );
+    return outputPanel;
+}
+
+function setLoading() {
+    var outputPanel = document.getElementById('output-panel');
+    clearElementChildren(outputPanel);
+    var loadingDiv = genElement('div', ['loading-spinner', 'flex-center'],
+        genElement('div', ['wrapper'],
+            genElement('div', ['wheel'])
+        )
+    );
+    outputPanel.appendChild(loadingDiv);
+}
+
+
+function clearElementChildren(element) {
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+}
+
+function genElement(tag, classList=null, bodyElement=null) {
+    var element = document.createElement(tag);
+    if (classList)
+        element.classList.add(...classList);
+    if (bodyElement)
+        element.appendChild(bodyElement);
+    return element;
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 panel-group">
+        <div class="panel panel--bordered">
+            <div class="row">
+                <div class="col-md-6 panel text-center">
+                    <a class="btn btn--primary btn--wide" href="{{ url_for('api_dump_mappings_native') }}">Backup</a>
+                </div>
+                <div class="col-md-6 panel text-center">
+                    <button id="restore" class="btn btn--primary btn--wide">Restore</button>
+                    <input id="restoreFile" type="file" style="display: none;">
+                </div>
+            </div>
+        </div>
+        <div id="output-panel" class="panel panel--bordered"></div>
+    </div>
+</div>
+{% endblock %}

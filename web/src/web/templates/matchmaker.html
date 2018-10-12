@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block page_header %}Matchmaker{% endblock %}
+
+{% block head_includes %}
+<script>
+
+var endpointMap = {
+    "matches": "{{ url_for('matches') }}",
+    "calculations": "{{ url_for('calculations_as_result') }}",
+    "datapath_details": "/datapath/view/"
+};
+
+window.addEventListener("load", function() {
+    // Query TDM for matches
+    var form = document.getElementById("matches-form");
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        fetchMatches(form);
+        fetchCalculations(form);
+    });
+    // Dynamic textarea height for DataPath input
+    var pathsTextArea = document.getElementById("paths");
+    pathsTextArea.oninput = function() {
+        pathsTextArea.style.height = "";
+        pathsTextArea.style.height = pathsTextArea.scrollHeight + "px";
+    };
+});
+
+function toggleLoading(loadingId, loadingClasses = ["loading-dots", "loading-dots--info"]) {
+    var element = document.getElementById(loadingId);
+    for (let className of loadingClasses)
+        element.classList.toggle(className);
+}
+
+function fetchCalculations(form) {
+    var calculationsLoader = "calculations-loader";
+    var calculationsEndpoint = endpointMap["calculations"];
+    toggleLoading(calculationsLoader);
+    postForm(calculationsEndpoint, form).then(response => response.json())
+    .catch(error => console.error("Error:", error))
+    .then(function(response) {
+        updateCalculations(response);
+    }).finally(function() { toggleLoading(calculationsLoader); }, calculationsLoader);
+}
+
+function fetchMatches(form) {
+    var matchesLoader = "matches-loader";
+    var matchesEndpoint = endpointMap["matches"];
+    toggleLoading(matchesLoader);
+    postForm(matchesEndpoint, form).then(response => response.json())
+    .catch(error => console.error("Error:", error))
+    .then(function(response) {
+        updateMatches(response);
+    }).finally(function() { toggleLoading(matchesLoader); }, matchesLoader);
+}
+
+function createDataPathEntry(datapath, rowspan = null) {
+    let dataPathEntry = document.createElement("td");
+    if (rowspan)
+        dataPathEntry.setAttribute("rowspan", rowspan);
+    dataPathEntry.classList.add("datapath");
+    let dataPathURL = document.createElement("a");
+    dataPathURL.setAttribute("href", endpointMap["datapath_details"] + datapath["_key"]);
+    dataPathURL.setAttribute("machine_id", datapath["machine_id"]);
+    dataPathURL.setAttribute("human_id", datapath["human_id"]);
+    dataPathURL.appendChild(document.createTextNode(datapath["human_id"]));
+    dataPathEntry.appendChild(dataPathURL);
+    return dataPathEntry;
+}
+
+function updateMatches(matches) {
+    let matchesTable = document.getElementById("matches-table");
+    let matchesTableBody = matchesTable.querySelector("tbody");
+    clearElementChildren(matchesTableBody);
+    for (let match of matches) {
+        let matchRow = document.createElement("tr");
+        matchRow.appendChild(
+            createDataPathEntry(match, match["matches"].length)
+        );
+        let first = true;
+        for (let matchContent of match["matches"]) {
+            if (first) {
+                matchRow.appendChild(
+                    createDataPathEntry(matchContent)
+                );
+                first = false;
+                matchesTableBody.appendChild(matchRow);
+            } else {
+                let matchEntryRow = document.createElement("tr");
+                matchEntryRow.appendChild(
+                    createDataPathEntry(matchContent)
+                );
+                matchesTableBody.appendChild(matchEntryRow);
+            }
+        }
+    }
+}
+
+function updateCalculations(calculations) {
+    let calculationsTable = document.getElementById("calculations-table");
+    let calculationsTableBody = calculationsTable.querySelector("tbody");
+    clearElementChildren(calculationsTableBody);
+    for (let calculation of calculations) {
+        for (let subCalc of calculation["calculations"]) {
+            let rowspan = subCalc["factors"].length;
+            let calculationRow = document.createElement("tr");
+            let calculationName = document.createElement("td");
+            calculationName.setAttribute("rowspan", rowspan);
+            calculationName.appendChild(document.createTextNode(subCalc["name"]));
+            calculationRow.appendChild(calculationName);
+            calculationRow.appendChild(
+                createDataPathEntry(calculation, rowspan)
+            );
+            let first = true;
+            for (let factor of subCalc["factors"]) {
+                if (first) {
+                    calculationRow.appendChild(
+                        createDataPathEntry(factor)
+                    );
+                    first = false;
+                    calculationsTableBody.appendChild(calculationRow);
+                } else {
+                    let factorRow = document.createElement("tr");
+                    factorRow.appendChild(
+                        createDataPathEntry(factor)
+                    );
+                    calculationsTableBody.appendChild(factorRow);
+                }
+            }
+        }
+    }
+}
+
+function clearElementChildren(element) {
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+}
+
+function postForm(endpoint, form) {
+    // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+    return fetch(endpoint, {
+        body: new URLSearchParams(new FormData(form)),
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: {
+            "content-type": "application/x-www-form-urlencoded"
+        },
+        method: "POST",
+        mode: "cors",
+        redirect: "follow",
+        referrer: "no-referrer"
+    });
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 panel-group">
+        <div class="panel panel--bordered">
+            <div>
+                <p>Input the paths you wish to check TDM for matches for, and it will report back direct matches, calculations, and those that do not yet have matches.</p>
+                <small>The below form will resize dynamically with the amount of data paths you input.</small>
+            </div>
+            <div class="divider divider--accent-blue"></div>
+            <div>
+                <form id="matches-form" method="POST">
+                    {{ match_form.hidden_tag() }}
+                    <div class="form-group">
+                        <div class="form-group__text">
+                            {{ match_form.paths.label }}
+                            {{ match_form.paths(class_="textarea", placeholder="Cisco-IOS-XR-infra-statsd-oper:infra-statistics/interfaces/interface/latest/generic-counters/multicast-packets-sent") }}
+                        </div>
+                    </div>
+                    {{ match_form.submit(class_="btn btn--primary") }}
+                </form>
+            </div>
+        </div>
+        <div class="panel panel--bordered">
+            <div class="responsive-table">
+                <p>Matches</p><div id="matches-loader"><span></span><span></span><span></span></div>
+                <table id="matches-table" class="table table--bordered table--nostripes table--hover">
+                    <thead>
+                        <tr>
+                            <th>Submitted</th>
+                            <th>Returned</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>None</td>
+                            <td>None</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="responsive-table">
+                <p>Calculations</p><div id="calculations-loader"><span></span><span></span><span></span></div>
+                <table id="calculations-table" class="table table--bordered table--nostripes table--hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Result</th>
+                            <th>Factors</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>None</td>
+                            <td>None</td>
+                            <td>None</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

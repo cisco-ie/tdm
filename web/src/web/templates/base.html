@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>{% block title %}Telemetry Data Mapper{% endblock %}</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='cui-1.2.2-official/css/cui-standard.min.css') }}">
+        <link rel="icon" type="image/x-icon" href="https://www.cisco.com/favicon.ico">
+        {% block head_includes %}{% endblock %}
+    </head>
+    <body class="cui">
+        <div class="content-fluid">
+            <div class="sidebar sidebar--indigo" >
+                <div class="sidebar__header">
+                    <div class="sidebar__header-title">{% block page_header %}Telemetry Data Mapper{% endblock %}</div>
+                </div>
+                <ul>
+                    <li class="sidebar__item">
+                        <a href="{{ url_for('index') }}">
+                            <span class="icon-home"></span>
+                            <span class="half-margin-left">Index</span>
+                        </a>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="{{ url_for('search_es') }}">
+                            <span class="icon-search"></span>
+                            <span class="half-margin-left">Search</span>
+                        </a>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="{{ url_for('matchmaker') }}">
+                            <span class="icon-intercom-duplex-connected"></span>
+                            <span class="half-margin-left">Matchmaker</span>
+                        </a>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="{{ url_for('datapath_direct') }}">
+                            <span class="icon-at"></span>
+                            <span class="half-margin-left">DataPath Direct</span>
+                        </a>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="{{ url_for('datapath_matches') }}">
+                            <span class="icon-certified"></span>
+                            <span class="half-margin-left">All Mappings</span>
+                        </a>
+                    </li>
+                    <li class="sidebar__item">
+                        <a href="{{ url_for('html_map_bulk') }}">
+                            <span class="icon-link"></span>
+                            <span class="half-margin-left">Import CSV</span>
+                        </a>
+                    <li class="sidebar__item">
+                        <a href="{{ url_for('html_map_backup') }}">
+                            <span class="icon-animation"></span>
+                            <span class="half-margin-left">Backup/Restore</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <main>
+                <header class="header header--compressed">
+                    <div class="header-bar container">
+                        <a class="header-bar__logo">
+                            <span class="icon-cisco"></span>
+                        </a>
+                        <div class="header-bar__main">
+                            <div class="header-breadcrumbs">
+                            </div>
+                            <div class="header-heading">
+                                <h1 class="page-title">{% block page_title %}Telemetry Data Mapper{% endblock %}</h1>
+                            </div>
+                        </div>
+                        <div class="header-toolbar">
+                            <div class="alert" style="margin: 0;">
+                                <div class="alert__icon icon-info-circle"></div>
+                                <div class="alert__message"><strong>Alpha</strong> <a target="_blank" href="https://www.github.cisco.com/cisco-ie/tdm/issues">Report Bugs</a></div>
+                                <div class="alert__close"></div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <div class="content">
+                    <div class="container">
+                        <div class="section">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                            {% for category, message in messages %}
+                            <div class="alert alert--{{ category }}">
+                                <div class="alert__icon"></div>
+                                <div class="alert__message">{{ message }}</div>
+                                <div class="alert__close"></div>
+                            </div>
+                            {% endfor %}
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="section">
+                            {% block content %}Not yet implemented!{% endblock %}
+                        </div>
+                    </div>
+                </div>
+                <footer class="footer footer--new footer--basic footer--compressed">
+                    <div class="footer__links">
+                        <ul class="list">
+                            <li><a href="https://www.github.cisco.com/cisco-ie/tdm" target="_blank">Source Code</a></li>
+                            <li><a href="http://www.cisco.com/cisco/web/siteassets/contacts/index.html" target="_blank">Contacts</a></li>
+                            <li><a href="https://secure.opinionlab.com/ccc01/o.asp?id=jBjOhqOJ" target="_blank">Feedback</a></li>
+                            <li><a href="http://www.cisco.com/c/en/us/about/sitemap.html" target="_blank">Site Map</a></li>
+                            <li><a href="http://www.cisco.com/web/siteassets/legal/terms_condition.html" target="_blank">Terms & Conditions</a></li>
+                            <li><a href="http://www.cisco.com/web/siteassets/legal/privacy_full.html" target="_blank">Privacy Statement</a></li>
+                            <li><a href="http://www.cisco.com/web/siteassets/legal/privacy_full.html#cookies" target="_blank">Cookie Policy</a></li>
+                            <li><a href="http://www.cisco.com/web/siteassets/legal/trademark.html" target="_blank">Trademarks</a></li>
+                        </ul>
+                    </div>
+                </footer>
+            </main>
+        </div>
+        {% block end_body_content %}{% endblock %}
+    </body>
+</html>

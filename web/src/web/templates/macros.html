@@ -1,0 +1,21 @@
+{% macro render_field(field) %}
+{% if field.type in ['HiddenField', 'SubmitField'] %}
+{{ field(**kwargs)|safe }}
+{% else %}
+<div class="{{ 'form-group' if not field.errors else 'form-group form-group--helper' }}">
+    <div class="form-group__text">
+        {{ field.label }}
+        {{ field(**kwargs)|safe }}
+    </div>
+    {% if field.errors %}
+    <div class="help-block text-danger">
+        {% for error in field.errors %}
+        <span class="icon-error"></span>
+        <span>{{ error }}</span>
+        {% if not loop.last %}<br>{% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+{% endmacro %}

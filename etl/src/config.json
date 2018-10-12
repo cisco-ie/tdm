@@ -1,0 +1,7 @@
+{
+    "arango": {
+        "arangoURL": "http://dbms:8529",
+        "username": "root",
+        "password": "tdm"
+    }
+}

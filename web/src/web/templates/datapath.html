@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% import 'macros.html' as macros %}
+
+{% block page_header %}DataPath Details{% endblock %}
+
+{% block head_includes %}
+<script>
+window.addEventListener("load", function() {
+    var mappingInputId = 'matchpath';
+    hideElement('matchpath-helper');
+    var mappingInput = document.getElementById(mappingInputId);
+    applyMappingValidationLogic(mappingInput);
+});
+
+var inputTimeout = null;
+function applyMappingValidationLogic(mappingInput) {
+    // https://schier.co/blog/2014/12/08/wait-for-user-to-stop-typing-using-javascript.html
+    mappingInput.onkeyup = function(e) {
+        clearTimeout(inputTimeout);
+        inputTimeout = setTimeout(function() {
+            mappingInput.disabled = true;
+            disableMatchpathSubmit();
+            setHelperContent('matchpath-helper', [], '', '<div class="loading-dots loading-dots--info"><span></span><span></span><span></span></div>');
+            var apiBody = JSON.stringify(
+                {
+                    'id': mappingInput.value
+                }
+            );
+            fetch("{{ url_for('api_datapath_from_arbitrary_id') }}", {
+                body: apiBody,
+                credentials: "same-origin",
+                headers: {
+                    "content-type": "application/json"
+                },
+                method: "POST",
+                mode: "cors",
+                redirect: "follow",
+                referrer: "no-referrer"
+            }).then(response => response.json())
+            .catch(error => console.error("Error:", error))
+            .then(function(response) {
+                var matchpathHelperId = 'matchpath-helper';
+                if (response['error']) {
+                    if (response['error'].toLowerCase().includes('multiple')) {
+                        setHelperContent(matchpathHelperId, ['text-warning'], 'icon-exclamation-triangle', response['error']);
+                    } else {
+                        setHelperContent(matchpathHelperId, ['text-danger'], 'icon-error', response['error']);
+                    }
+                    disableMatchpathSubmit();
+                    restoreElement(matchpathHelperId);
+                } else if (response['key']) {
+                    hideElement(matchpathHelperId);
+                    enableMatchpathSubmit(response['key']);
+                } else {
+                    disableMatchpathSubmit();
+                    var errorMsg = 'Unknown error occurred in fetching matchpath.';
+                    console.error(errorMsg);
+                    setHelperContent(matchpathHelperId, ['text-danger'], 'icon-error', errorMsg);
+                    restoreElement(matchpathHelperId);
+                }
+            }).finally(function() { mappingInput.disabled = false; });
+        }, 500);
+    };
+}
+
+function disableMatchpathSubmit() {
+    var matchpathSubmit = document.getElementById('submit');
+    matchpathSubmit.disabled = true;
+    matchpathSubmit.classList.remove('btn--success');
+    var matchpathKey = document.getElementById('matchpath_key');
+    matchpathKey.value = '';
+}
+
+function enableMatchpathSubmit(keyValue) {
+    var matchpathSubmit = document.getElementById('submit');
+    if (matchpathSubmit.disabled == false) {
+        console.error('matchpath-submit is already enabled! Bad. Continuing anyways.');
+    }
+    matchpathSubmit.classList.add('btn--success');
+    matchpathSubmit.disabled = false;
+    var matchpathKey = document.getElementById('matchpath_key');
+    matchpathKey.value = keyValue;
+}
+
+function setHelperContent(helperPanelId, panelClassList, symbolClass, helperMessage) {
+    var helperPanelElement = document.getElementById(helperPanelId);
+    // Remove existing panel classes except help-block
+    for (var elemClass of helperPanelElement.classList) {
+        if (elemClass == 'help-block') {
+            continue;
+        }
+        helperPanelElement.classList.remove(elemClass);
+    }
+    helperPanelElement.classList.add(...panelClassList);
+    var helperSymbolElement = document.getElementById(helperPanelId + '-symbol');
+    helperSymbolElement.className = symbolClass;
+    // Set helper message to HTML for HTML messages.
+    var helperMessageElement = document.getElementById(helperPanelId + '-message');
+    helperMessageElement.innerHTML = helperMessage;
+}
+
+var toggledDisplayElements = {};
+function hideElement(elementId, display = 'none') {
+    var element = document.getElementById(elementId);
+    if (!(element.id in toggledDisplayElements)) {
+        toggledDisplayElements[element.id] = element.style.display;
+    }
+    element.style.display = display;
+}
+
+function restoreElement(elementId) {
+    var element = document.getElementById(elementId);
+    if (!(element.id in toggledDisplayElements)) {
+        console.log('Element ' + element.id + ' never hidden, ignoring.');
+    } else {
+        element.style.display = toggledDisplayElements[element.id];
+    }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 panel-group">
+        <div class="panel panel--bordered">
+            <div>
+                <h4>{{ datapath['human_id'] }}</h4>
+            </div>
+            <div class="divider divider--accent-blue"></div>
+            <div class="responsive-table">
+                <p>
+                    {% if datapath['is_leaf'] %}
+                    <span class="label label--info">Leaf Node</span>
+                    {% else %}
+                    <span class="label label--info">Parent Node</span>
+                    {% endif %}
+                    {% if datapath['verified'] %}
+                    <span class="label label--success">Verified</span>
+                    {% else %}
+                    <span class="label label--danger">Not Verified</span>
+                    {% endif %}
+                    {% if datapath['is_variable'] %}
+                    <span class="label label--warning-alt">Variable Node</span>
+                    {% endif %}
+                    {% if datapath['is_configurable'] %}
+                    <span class="label">Configurable</span>
+                    {% endif %}
+                </p>
+                <table class="table table--bordered table--loose table--nostripes table--wrap">
+                    <tbody>
+                        <tr>
+                            <th>Human ID</th>
+                            <td>{{ datapath['human_id'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Machine ID</th>
+                            <td>{{ datapath['machine_id'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
+                            <td>{{ datapath['description'] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Data Type</th>
+                            <td>
+                            {% if datapath_datatypes %}
+                                {% for datatype in datapath_datatypes %}
+                                {{ datatype.name }}{{ ',' if not loop.last }}
+                                {% endfor %}
+                            {% else %}
+                                None (Container/Parent)
+                            {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="panel panel--bordered">
+            {% if not datapath_models %}
+            <div class="panel panel--danger">
+                <h6>No linked Data Models!</h6>
+            </div>
+            {% else %}
+            <div>
+                <h5>Data Models</h5>
+            </div>
+            <div class="divider divider--accent-blue"></div>
+            <ul class="list list--inline list--compressed list--highlight">
+                {% for datamodel in datapath_models %}
+                <li style="margin-left: 5px; margin-right: 5px;"><div class="panel panel--bordered">{{ datamodel['name'] }}{{ ('@' + datamodel['revision']) if datamodel['revision'] else '' }}</div></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        <div class="panel panel--bordered">
+            <h5>DataPath Matches</h5>
+            <div class="divider divider--accent-blue"></div>
+            {% if not datapath_mappings %}
+            <div class="panel">
+                <h6>No DataPaths mapped as matches!</h6>
+            </div>
+            {% else %}
+            <div class="panel">
+                <table class="responsive-table">
+                    <tbody>
+                        {% for datapath in datapath_mappings %}
+                        <tr>
+                            <td><a href="{{ url_for('datapath_details', _key=datapath['_key']) }}">{{ datapath['human_id'] }}</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+            <div class="panel">
+                <h6>Add Match</h6>
+                <hr>
+                <form action="{{ url_for('datapath_match', _key=datapath['_key']) }}" method="POST">
+                    {{ macros.render_field(match_form.hidden_tag) }}
+                    {{ macros.render_field(match_form.matchpath_key) }}
+                    <div class="form-group form-group--helper">
+                        <div class="form-group__text">
+                            {{ match_form.matchpath.label }}
+                            {{ match_form.matchpath(type='search', placeholder=datapath['human_id'], required=True) }}
+                        </div>
+                        <div id="matchpath-helper" class="help-block">
+                            <span id="matchpath-helper-symbol"></span>
+                            <span id="matchpath-helper-message"></span>
+                        </div>
+                    </div>
+                    {{ macros.render_field(match_form.author, placeholder="whoami@tdm.com", required=True) }}
+                    {{ macros.render_field(match_form.weight, min=0, max=100, placeholder='0 - 100', required=True) }}
+                    {{ macros.render_field(match_form.annotation, placeholder="Describe any important information about this match.") }}
+                    {{ macros.render_field(match_form.submit, class_="btn", disabled=True) }}
+                </form>
+            </div>
+        </div>
+        {% if datapath_children %}
+        <div class="panel panel--bordered">
+            <h5>DataPath Children</h5>
+            <div class="divider divider--accent-blue"></div>
+            <table class="responsive-table">
+                <tbody>
+                    {% for datapath in datapath_children %}
+                    <tr>
+                        <td><a href="{{ url_for('datapath_details', _key=datapath['_key']) }}">{{ datapath['human_id'] }}</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        {% if datapath_parent %}
+        <div class="panel panel--bordered">
+            <h5>DataPath Parents</h5>
+            <div class="divider divider--accent-blue"></div>
+            <table class="responsive-table">
+                <tbody>
+                    {% for datapath in datapath_parent %}
+                    <tr>
+                        <td><a href="{{ url_for('datapath_details', _key=datapath['_key']) }}">{{ datapath['human_id'] }}</a></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

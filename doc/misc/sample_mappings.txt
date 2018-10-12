@@ -1,0 +1,10 @@
+ifHCInBroadcastPkts
+ifAlias
+Cisco-IOS-XR-infra-statsd-oper:infra-statistics/interfaces/interface/latest/generic-counters/broadcast-packets-received
+Cisco-IOS-XR-pfi-im-cmd-oper:interfaces/interface-xr/interface/description
+Cisco-IOS-XR-infra-statsd-oper:infra-statistics/interfaces/interface/latest/generic-counters/multicast-packets-received
+ifHCOutUcastPkts
+ifHCInUcastPkts
+ifHighSpeed
+ifOutDiscards
+asdf1234

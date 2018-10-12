@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block page_header %}Import CSV{% endblock %}
+
+{% block head_includes %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/4.5.0/papaparse.min.js" integrity="sha256-stOh2I/t/3J+QGIFvUyHxFAYWcNIQdCQdXpyDKDuHLc=" crossorigin="anonymous"></script>
+<script>
+
+function toggleModal(modalId, content = null) {
+    if (content) {
+        var modalBody = document.getElementById("response-modal-body");
+        while (modalBody.firstChild) {
+            modalBody.removeChild(modalBody.firstChild);
+        }
+        modalBody.appendChild(
+            document.createTextNode(content)
+        );
+    }
+    document.getElementById("modal-backdrop").classList.toggle("hide");
+    document.getElementById(modalId).classList.toggle("hide");
+}
+
+var endpointMap = {
+    "apiMapSingle": "{{ url_for('api_map_datapath_single') }}"
+};
+
+// Check for the various File API support.
+if (!(window.File && window.FileReader && window.FileList && window.Blob)) {
+    alert("The File APIs are required for this functionality.");
+}
+
+window.addEventListener("load", function() {
+    document.getElementById("mappingsFile").addEventListener(
+        "change", function(event) {
+            event.preventDefault();
+            console.debug("Mappings file changed!");
+            parseMappings(event.target.files[0]);
+        }
+    )
+});
+
+function parseMappings(file) {
+    // Tried doing parallel worker threads with step and a worker
+    // coordinator but it became too complex for me without mutex-like behavior.
+    console.debug("Parsing mappings...");
+    Papa.parse(file, {
+        header: true,
+        transform: function(parsedVal, columnNumber) { return parsedVal.trim() },
+        complete: processMappings
+    });
+}
+
+function processMappings(result) {
+    console.debug("Adding mappings DOM elements...");
+    for (var rowIdx in result['data']) {
+        var thisIdx = rowIdx;
+        var row = result['data'][rowIdx];
+        addRowHTML(thisIdx, row);
+    }
+    console.debug("Submitting mappings...");
+    submitMappings([0, result['data']]);
+}
+
+function submitMappings(metadata) {
+    var idx = metadata[0];
+    var data = metadata[1];
+    if (idx >= data.length) {
+        console.info("Done submitting mappings!");
+        return;
+    }
+    var row = data[idx];
+    var formattedData = {
+        "mapOne": row["First DataPath"],
+        "mapTwo": row["Second DataPath"],
+        "author": row["Author"],
+        "annotation": row["Annotation"]
+    };
+    var newMetadata = [idx+1, data];
+    return new Promise(function(resolve, reject) {
+        if (!formattedData["mapOne"] || !formattedData["mapTwo"]) {
+            return reject("Missing DataPath in mapping!");
+        } else if (!formattedData["author"]) {
+            return reject("Author must be supplied!");
+        } else {
+            return fetch(endpointMap["apiMapSingle"], {
+                body: JSON.stringify(formattedData),
+                cache: "no-cache",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                method: "POST",
+                mode: "cors",
+                redirect: "follow",
+                referrer: "no-referrer"
+            }).then(resolve, reject);
+        }
+    }).then(
+        response => response.json(),
+        function(error) {
+            console.error(error);
+            return {"error": error};
+        }
+    ).then(
+        function(response) {
+            setRowHTML(idx, response);
+        }
+    ).finally(function() { submitMappings(newMetadata); }, newMetadata);
+}
+
+function setRowHTML(idx, response) {
+    var responseIndicator = document.createElement("span");
+    var iconElement = document.createElement("span");
+    var classString = "label label--circle label--small";
+    if (response["error"]) {
+        console.debug(response["error"]);
+        responseIndicator.setAttribute("class", classString + " label--danger");
+        responseIndicator.setAttribute("onclick", "toggleModal(\"response-modal\", \"" + response["error"] + "\")");
+        iconElement.setAttribute("class", "icon-blocked");
+        responseIndicator.appendChild(iconElement);
+    } else {
+        responseIndicator.setAttribute("class", classString + " label--success");
+        iconElement.setAttribute("class", "icon-check");
+    }
+    responseIndicator.appendChild(iconElement);
+    var statusElement = document.getElementById("row-" + idx + "-status");
+    while (statusElement.firstChild) {
+        statusElement.removeChild(statusElement.firstChild);
+    }
+    statusElement.appendChild(responseIndicator);
+}
+
+function addRowHTML(idx, row) {
+    var matchTable = document.getElementById("match-table").querySelector("tbody");
+    var matchRow = document.createElement("tr");
+    var firstElement = document.createElement("td");
+    firstElement.appendChild(
+        document.createTextNode(row["First DataPath"])
+    );
+    var secondElement = document.createElement("td");
+    secondElement.appendChild(
+        document.createTextNode(row["Second DataPath"])
+    );
+    var statusElement = document.createElement("td");
+    statusElement.setAttribute("id", "row-" + idx + "-status");
+    var loaderElement = document.createElement("div");
+    loaderElement.setAttribute("id", "row-" + idx + "-loader");
+    loaderElement.setAttribute("class", "loading-dots loading-dots--info");
+    loaderElement.appendChild(document.createElement("span"));
+    statusElement.appendChild(loaderElement);
+    matchRow.appendChild(statusElement);
+    matchRow.appendChild(firstElement);
+    matchRow.appendChild(secondElement);
+    matchTable.appendChild(matchRow);
+}
+
+function toggleLoading(loadingId, loadingClasses = ["loading-dots", "loading-dots--info"]) {
+    var element = document.getElementById(loadingId);
+    for (let className of loadingClasses)
+        element.classList.toggle(className);
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 panel-group">
+        <div class="panel panel--bordered">
+            <div>
+                <p>Upload a CSV of mappings!</p>
+                <p><strong>Format MUST be of columns: "First DataPath", "Second DataPath", "Author", "Annotation"</strong></p>
+            </div>
+            <div class="divider divider--accent-blue"></div>
+            <div>
+                <form id="match-form">
+                    <input id="mappingsFile" type="file">
+                </form>
+            </div>
+        </div>
+        <div class="panel panel--bordered">
+            <div class="responsive-table">
+                <table id="match-table" class="table table--bordered">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>First DataPath</th>
+                            <th>Second DataPath</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block end_body_content %}
+<div class="modal hide" id="response-modal">
+    <div class="modal__dialog">
+        <div class="modal__content">
+            <a onclick="toggleModal('response-modal');" class="modal__close"><span class="icon-close"></span></a>
+            <div class="modal__header">
+                <h1 class="modal__title">Response</h1>
+            </div>
+        </div>
+        <div class="modal__body">
+            <div id="response-modal-body" class="panel">
+            </div>
+        </div>
+        <div class="modal__footer"></div>
+    </div>
+</div>
+<div id="modal-backdrop" class="modal-backdrop hide"></div>
+{% endblock %}

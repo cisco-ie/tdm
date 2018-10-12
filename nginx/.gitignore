@@ -1,0 +1,5 @@
+# Ignore all key/cert related secrets.
+*.key
+*.csr
+*.pem
+*.crt

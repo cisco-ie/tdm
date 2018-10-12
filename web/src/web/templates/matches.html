@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block page_header %}Matches{% endblock %}
+
+{% block content %}
+<a class="btn btn--primary" href="{{ url_for('api_dump_mappings_csv') }}" download>Backup as CSV</a>
+{% for dml_name, dml_matches in dml_matches.items() %}
+<div class="section">
+    <div class="panel panel--dkgray panel--compressed base-margin-top">
+        <h6>{{ dml_name }}</h6>
+    </div>
+    <ul class="list">
+    {% for match in dml_matches %}
+        <li><div class="panel panel--bordered"><a target="_blank" href="{{ url_for('datapath_details', _key=match['_key']) }}">{{ match['human_id'] }} </a></div></li>
+    {% endfor %}
+    </ul>
+</div>
+{% endfor %}
+{% endblock %}

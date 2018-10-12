@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block page_header %}Search{% endblock %}
+
+{% block head_includes %}
+<style>
+.cui ul.list--highlight > li.list--nohighlight { pointer-events: none; };
+</style>
+<script>
+
+var endpointMap = {
+    "search": "{{ url_for('search_deep_api') }}",
+    "datapath_details": "/datapath/view/"
+};
+
+window.addEventListener("load", function() {
+    var form = document.getElementById("search-form");
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        fetchSearch(form);
+    });
+    form.addEventListener("change", function(event) {
+        var sourceElement = event.target || event.srcElement;
+        var sourceElementId = event.id;
+    });
+});
+
+function fetchSearch(form) {
+    var searchLoader = "search-loader";
+    var searchEndpoint = endpointMap["search"];
+    toggleLoading(searchLoader);
+    document.getElementById("submit").classList.toggle("disabled");
+    postForm(searchEndpoint, form).then(response => response.json())
+    .catch(error => console.error("Error:", error))
+    .then(function(response) {
+        updateSearchResults(response);
+    }).finally(function() {
+        toggleLoading(searchLoader);
+        document.getElementById("submit").classList.toggle("disabled");
+        document.getElementById("search-output").scrollIntoView();
+    }, searchLoader);
+}
+
+function clearElementChildren(element) {
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+}
+
+function genElement(tag, classList=null, bodyElement=null) {
+    var element = document.createElement(tag);
+    if (classList)
+        element.classList.add(...classList);
+    if (bodyElement)
+        element.appendChild(bodyElement);
+    return element;
+}
+
+function toggleMachineIdDisplay() {
+    var toggleElement = document.getElementById(this.text);
+    if (toggleElement.style.display !== "none") {
+        toggleElement.style.display = "none";
+    } else {
+        toggleElement.style.display = "";
+    }
+}
+
+function updateSearchResults(response) {
+    var outputArea = document.getElementById("search-output");
+    clearElementChildren(outputArea);
+    var outputList = genElement("ul", ["list", "list--highlight"]);
+    outputArea.appendChild(outputList);
+    var topPanel = genElement("div", ["panel", "panel--dkgray", "panel--compressed", "base-margin-top"]);
+    // Show how many hits found
+    topPanel.appendChild(
+        genElement("span", ["label", "label--mdgray"],
+            document.createTextNode(response["hits"] + " Hits")
+        )
+    );
+    // Show how many ms it took
+    topPanel.appendChild(
+        genElement("span", ["label", "label--mdgray"],
+            document.createTextNode(response["took"] + "ms")
+        )
+    );
+    outputList.appendChild(
+        genElement("li", ["list--nohighlight"], topPanel)
+    );
+    for (var humanId in response["human_id"]) {
+        var humanIdHits = response["human_id"][humanId];
+        var datapathElement = genElement("div", ["panel", "panel--bordered"]);
+        var humanIdDiv = genElement("div", ["row"]);
+        datapathElement.appendChild(humanIdDiv);
+        // Show the query relevance score and shorten to 3 decimals
+        var relevanceDiv = genElement("div", ["col-md-1"],
+            genElement("span", ["label", "label--blue"],
+                document.createTextNode(humanIdHits["relevance"].toFixed(3))
+            )
+        );
+        relevanceDiv.style.textAlign = "center";
+        humanIdDiv.appendChild(relevanceDiv);
+        var humanIdLinkDiv = genElement("div", ["col-md-11"]);
+        var humanIdLink = genElement("a", null, document.createTextNode(humanId));
+        humanIdLink.setAttribute("toggleId", humanId);
+        humanIdLinkDiv.appendChild(humanIdLink);
+        humanIdDiv.appendChild(humanIdLinkDiv);
+        if (Object.keys(humanIdHits["machine_id"]).length == 1) {
+            // Only one machine_id so we can just directly link from human_id
+            humanIdLink.setAttribute(
+                "href",
+                endpointMap["datapath_details"] + Object.keys(humanIdHits["machine_id"])[0]
+            );
+            humanIdLink.setAttribute("target", "_blank");
+        } else {
+            // Create div with a nice looking divider at the top
+            var machineIdDiv = genElement("div", null,
+                genElement("div", ["divider", "divider--accent-blue"])
+            );
+            machineIdDiv.setAttribute("id", humanId);
+            // div is hidden by default
+            machineIdDiv.style.display = "none";
+            // Clicking on the human_id link will toggle display
+            humanIdLink.onclick = toggleMachineIdDisplay;
+            datapathElement.appendChild(machineIdDiv);
+            var machineIdList = document.createElement("ul");
+            for (var machineIdKey in humanIdHits["machine_id"]) {
+                var machineId = humanIdHits["machine_id"][machineIdKey];
+                var machineIdLink = genElement("a", null,
+                    document.createTextNode(machineId)
+                );
+                machineIdLink.setAttribute("href", endpointMap["datapath_details"] + machineIdKey);
+                machineIdLink.setAttribute("target", "_blank");
+                machineIdList.appendChild(
+                    genElement("li", null,
+                        machineIdLink
+                    )
+                );
+            }
+            machineIdDiv.appendChild(machineIdList);
+        }
+        outputList.appendChild(
+            genElement("li", null, datapathElement)
+        );
+    }
+}
+
+function toggleLoading(loadingId, loadingClasses = ["loading-dots", "loading-dots--info"]) {
+    var element = document.getElementById(loadingId);
+    for (let className of loadingClasses)
+        element.classList.toggle(className);
+}
+
+function postForm(endpoint, form) {
+    // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+    return fetch(endpoint, {
+        body: new URLSearchParams(new FormData(form)),
+        cache: "no-cache",
+        credentials: "same-origin",
+        headers: {
+            "content-type": "application/x-www-form-urlencoded"
+        },
+        method: "POST",
+        mode: "cors",
+        redirect: "follow",
+        referrer: "no-referrer"
+    });
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 panel-group">
+        <div class="panel panel--bordered">
+            <div class="row">
+                <div class="col-md-9">
+                    <p>Search TDM for Data Paths. If no results are returned after filtering on OS, it is possible that there are bugs in the models which have not yet been resolved. The latest OS should work. OIDs (SMI/SNMP) are not linked to any OS thus do not filter on any OS if you are interested in OIDs.</p>
+                </div>
+                <div style="text-align: right;" class="col-md-3">
+                    <p><a href="{{ url_for('search') }}">Classic Search (Deprecated)</a></p>
+                </div>
+            </div>
+            <div class="divider divider--accent-blue"></div>
+            <div>
+                <form id="search-form" method="POST">
+                    {{ search_form.hidden_tag() }}
+                    <p><strong>{{ search_form.oses.label.text }}</strong></p>
+                    <div class="form-group">
+                        {% for option in search_form.oses.choices %}
+                        <label class="checkbox">
+                            <input type="checkbox" name="oses" value="{{ option[0] }}">
+                            <span class="checkbox__input"></span>
+                            <span class="checkbox__label">{{ option[1] }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <p><strong>{{ search_form.dmls.label.text }}</strong></p>
+                    <div class="form-group">
+                        {% for option in search_form.dmls.choices %}
+                        <label class="checkbox">
+                            <input type="checkbox" name="dmls" value="{{ option[0] }}">
+                            <span class="checkbox__input"></span>
+                            <span class="checkbox__label">{{ option[1] }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <div class="form-group">
+                        <label class="switch switch--small">
+                            {{ search_form.exclude_config }}
+                            <span class="switch__label">{{ search_form.exclude_config.label.text }}</span>
+                            <span class="switch__input"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="switch switch--small">
+                            {{ search_form.only_leaves }}
+                            <span class="switch__label">{{ search_form.only_leaves.label.text }}</span>
+                            <span class="switch__input"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-group__text">
+                            {{ search_form.filter_str.label }}
+                            {{ search_form.filter_str(type='search', placeholder="openconfig interface name") }}
+                            <button type="button" class="link">
+                                <span class="icon-search"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="form-group__text">
+                            {{ search_form.num_results.label }}
+                            {{ search_form.num_results(type="number") }}
+                        </div>
+                    </div>
+                    {{ search_form.submit(class_="btn btn--primary") }}
+                </form>
+            </div>
+        </div>
+        <div class="panel panel--bordered">
+            <div id="search-loader"><span></span><span></span><span></span></div>
+            <div id="search-output" class="panel">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+"""Provide TDM specific functionality for transforming YANG.
+TODO: Revise with yang_parser.py
+"""
+import os
+import logging
+from pyang import statements
+from . import yang_parser
+
+class YANGBase:
+
+    def __init__(self, base_models_path, os_models_path, version_folder_map):
+        self.base_models_path = base_models_path
+        self.os_models_path = os_models_path
+        self.version_folder_map = version_folder_map
+        self.fq_os_models_path = self.get_fq_os_models_path()
+        self.version_path_map = self.get_version_path_map()
+
+    def get_version_path_map(self):
+        return {
+            version: os.path.join(self.fq_os_models_path, version_folder)
+            for version, version_folder in self.version_folder_map.items()
+        }
+
+    def get_fq_os_models_path(self):
+        """Fully qualifies OS model file paths."""
+        return os.path.join(self.base_models_path, self.os_models_path)
+
+    def get_version_path(self, version):
+        """Get the path for the specified release."""
+        version_path = None
+        try: 
+            version_path = os.path.join(
+                self.fq_os_models_path, 
+                self.version_folder_map[version]
+            )
+        except Exception:
+            raise ValueError('Version does not exist!')
+        return version_path
+
+    def parse_versions(self):
+        """Parse all the Releases and their corresponding DataModels."""
+        version_module_map = {}
+        for version, version_path in self.version_path_map.items():
+            version_data = version_module_map[version] = {}
+            modules = yang_parser.parse_repository(version_path)
+            logging.info('Found %d module(s) for %s.', len(modules.keys()), version)
+            for module_key, module_revision in modules.items():
+                module_data = version_data[module_key] = {}
+                for revision_key, module in module_revision.items():
+                    module_data[revision_key] = self.parse_module_oper_attrs(module, module)
+                logging.debug('Parsed %d revision(s) for %s.', len(module_data.keys()), module_key)
+            logging.debug('Parsed %d module(s) for %s.', len(version_data.keys()), version)
+        logging.debug('Parsed %d version(s).', len(version_module_map.keys()))
+        return version_module_map
+
+    def parse_module_oper_attrs(self, module, base_module):
+        """Parse out the readable DataPaths from parsed data models.
+        TODO: Validate the i_config filtering with pyang.
+        """
+        if not hasattr(module, 'i_children'):
+            return {}
+        module_children = (
+            child for child in module.i_children
+            if child.keyword in statements.data_definition_keywords
+        )
+        parsed_modules = {}
+        for child in module_children:
+            attr_dict = {
+                'base_module': base_module.arg,
+                'xpath': yang_parser.get_xpath(child, with_prefixes=True),
+                'cisco_xpath': yang_parser.get_cisco_xpath(child, base_module),
+                'type': yang_parser.get_qualified_type(child),
+                'primitive_type': yang_parser.get_primitive_type(child),
+                'rw': True if getattr(child, 'i_config', False) else False,
+                'description': yang_parser.get_description(child),
+                'children': self.parse_module_oper_attrs(child, base_module)
+            }
+            # Qualify based on module and xpath, not cisco_xpath.
+            # Would not account for derivation/augmentations.
+            parsed_modules[str((
+                attr_dict['base_module'],
+                attr_dict['xpath']
+            ))] = attr_dict
+        return parsed_modules
