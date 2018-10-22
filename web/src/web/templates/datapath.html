@@ -187,7 +187,7 @@ function restoreElement(elementId) {
             </div>
             <div class="divider divider--accent-blue"></div>
             <ul class="list list--inline list--compressed list--highlight">
-                {% for os_release in datapath_oses %}
+                {% for os_release in datapath_oses|sort %}
                 <li style="margin: 3px;"><div class="panel panel--bordered">{{ os_release }}</div></li>
                 {% endfor %}
             </ul>
@@ -204,7 +204,7 @@ function restoreElement(elementId) {
             </div>
             <div class="divider divider--accent-blue"></div>
             <ul class="list list--inline list--compressed list--highlight">
-                {% for datamodel in datapath_models %}
+                {% for datamodel in datapath_models|sort %}
                 <li style="margin: 3px;"><div class="panel panel--bordered">{{ datamodel }}</div></li>
                 {% endfor %}
             </ul>
