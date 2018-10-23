@@ -177,6 +177,23 @@ function restoreElement(elementId) {
             </div>
         </div>
         <div class="panel panel--bordered">
+            {% if not datapath_oses %}
+            <div class="panel panel--danger">
+                <h6>No linked Operating Systems!</h6>
+            </div>
+            {% else %}
+            <div>
+                <h5>Operating Systems</h5>
+            </div>
+            <div class="divider divider--accent-blue"></div>
+            <ul class="list list--inline list--compressed list--highlight">
+                {% for os_release in datapath_oses|sort %}
+                <li style="margin: 3px;"><div class="panel panel--bordered">{{ os_release }}</div></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        <div class="panel panel--bordered">
             {% if not datapath_models %}
             <div class="panel panel--danger">
                 <h6>No linked Data Models!</h6>
@@ -187,8 +204,8 @@ function restoreElement(elementId) {
             </div>
             <div class="divider divider--accent-blue"></div>
             <ul class="list list--inline list--compressed list--highlight">
-                {% for datamodel in datapath_models %}
-                <li style="margin-left: 5px; margin-right: 5px;"><div class="panel panel--bordered">{{ datamodel['name'] }}{{ ('@' + datamodel['revision']) if datamodel['revision'] else '' }}</div></li>
+                {% for datamodel in datapath_models|sort %}
+                <li style="margin: 3px;"><div class="panel panel--bordered">{{ datamodel }}</div></li>
                 {% endfor %}
             </ul>
             {% endif %}

@@ -68,15 +68,43 @@ def datapath_match(_key):
 @app.route('/datapath/view/<int:_key>')
 def datapath_details(_key):
     match_form = forms.DataPathMatchForm()
+    datapath_oses = set()
+    datapath_models = set()
+    for dp_graph in fetch_datapath_os_graph(_key):
+        dp_os = dp_graph['os_name']
+        if dp_os:
+            if dp_graph['os_release']:
+                dp_os = '%s - %s' % (dp_os, dp_graph['os_release'])
+            datapath_oses.add(dp_os)
+        dp_model = dp_graph['datamodel_name']
+        if dp_model:
+            if dp_graph['datamodel_revision']:
+                dp_model = '%s@%s' % (dp_model, dp_graph['datamodel_revision'])
+            datapath_models.add(dp_model)
     return flask.render_template('datapath.html',
         datapath=fetch_datapath(_key),
-        datapath_models=fetch_datapath_models(_key),
+        datapath_models=datapath_models,
+        datapath_oses=datapath_oses,
         datapath_parent=fetch_datapath_parent(_key),
         datapath_children=fetch_datapath_children(_key),
         datapath_datatypes=fetch_datapath_datatype(_key),
         datapath_mappings=fetch_datapath_mappings(_key),
         match_form=match_form
     )
+
+def fetch_datapath_os_graph(_key):
+    datapath_os_graph_query = """
+    LET datapath = DOCUMENT(CONCAT('DataPath/', @key))
+    FOR v, e, p IN 1..3 INBOUND datapath DataPathFromDataModel, ReleaseHasDataModel, OSHasRelease
+    RETURN {
+        "datamodel_name": p.vertices[1].name,
+        "datamodel_revision": p.vertices[1].revision,
+        "os_release": p.vertices[2].name,
+        "os_name": p.vertices[3].name
+    }
+    """
+    bind_vars = {'key': _key}
+    return query_db(datapath_os_graph_query, bind_vars, unlist=False)
 
 def fetch_datapath_mappings(_key):
     datapath_mappings_query = """
