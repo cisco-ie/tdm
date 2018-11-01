@@ -81,10 +81,16 @@ def datapath_details(_key):
             if dp_graph['datamodel_revision']:
                 dp_model = '%s@%s' % (dp_model, dp_graph['datamodel_revision'])
             datapath_models.add(dp_model)
+    datapath_dmls = set()
+    for dp_graph in fetch_datapath_dml_graph(_key):
+        dml_name = dp_graph['dml_name']
+        if dml_name:
+            datapath_dmls.add(dml_name)
     return flask.render_template('datapath.html',
         datapath=fetch_datapath(_key),
         datapath_models=datapath_models,
         datapath_oses=datapath_oses,
+        datapath_dmls=datapath_dmls,
         datapath_parent=fetch_datapath_parent(_key),
         datapath_children=fetch_datapath_children(_key),
         datapath_datatypes=fetch_datapath_datatype(_key),
@@ -105,6 +111,19 @@ def fetch_datapath_os_graph(_key):
     """
     bind_vars = {'key': _key}
     return query_db(datapath_os_graph_query, bind_vars, unlist=False)
+
+def fetch_datapath_dml_graph(_key):
+    datapath_dml_graph_query = """
+    LET datapath = DOCUMENT(CONCAT('DataPath/', @key))
+    FOR v, e, p IN 1..2 INBOUND datapath DataPathFromDataModel, OfDataModelLanguage
+    RETURN {
+        "datamodel_name": p.vertices[1].name,
+        "datamodel_revision": p.vertices[1].revision,
+        "dml_name": p.vertices[2].name
+    }
+    """
+    bind_vars = {'key': _key}
+    return query_db(datapath_dml_graph_query, bind_vars, unlist=False)
 
 def fetch_datapath_mappings(_key):
     datapath_mappings_query = """
@@ -1196,3 +1215,39 @@ def query_db(query, bind_vars=None, unlist=True):
     if unlist and len(return_elements) == 1:
         return_elements = return_elements[0]
     return return_elements
+
+"""Ugly Jinja2 bandaid for XPath issues."""
+def machine_id_to_8040(value):
+    """Reformats the machine_id bastardized XPath to RFC 8040 compliance."""
+    xpath_elements = value.split('/')
+    module = xpath_elements[0]
+    prefixed_elements = xpath_elements[1:]
+    initial_prefix = prefixed_elements[0].split(':')[0]
+    adjusted_elements = ['']
+    for index, element in enumerate(prefixed_elements):
+        prefix, element = element.split(':')
+        if prefix == initial_prefix:
+            adjusted_elements.append('%s:%s' % (module, element))
+        else:
+            adjusted_elements.extend(prefixed_elements[index:])
+            break
+    return machine_id_to_prefixed('/'.join(adjusted_elements))
+
+def machine_id_to_prefixed(value):
+    """Reformats the machine_id to simplified prefixed specification."""
+    qualified_xpath = value[value.index('/'):]
+    xpath_elements = qualified_xpath.split('/')[1:]
+    running_prefix = None
+    xpath_prefixed_elements = ['']
+    for qualified_element in xpath_elements:
+        prefix, element = qualified_element.split(':')
+        if prefix == running_prefix:
+            xpath_prefixed_elements.append(element)
+        else:
+            xpath_prefixed_elements.append('%s:%s' % (prefix, element))
+            running_prefix = prefix
+    return '/'.join(xpath_prefixed_elements)
+
+app.jinja_env.filters['machine_id_to_8040'] = machine_id_to_8040
+app.jinja_env.filters['machine_id_to_prefixed'] = machine_id_to_prefixed
+"""End bandaid."""
