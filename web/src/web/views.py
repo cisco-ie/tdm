@@ -122,6 +122,8 @@ def fetch_datapath_dml_graph(_key):
         "dml_name": p.vertices[2].name,
     }
     """
+    bind_vars = {'key': _key}
+    return query_db(datapath_dml_graph_query, bind_vars, unlist=False)
 
 def fetch_datapath_mappings(_key):
     datapath_mappings_query = """
