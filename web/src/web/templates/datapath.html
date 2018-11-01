@@ -156,15 +156,21 @@ function restoreElement(elementId) {
                             <th>Machine ID</th>
                             <td>{{ datapath['machine_id'] }}</td>
                         </tr>
+                        {% if datapath_oses|length > 0 %}
+                        <tr>
+                            <th>RFC 8040 XPath</th>
+                            <th>{{ datapath['machine_id']|machine_id_to_8040 }}</th>
+                        </tr>
+                        {% endif %}
                         {% if 'IOS XE' in datapath_oses|join %}
                         <tr>
-                            <th>XE XPath</th>
+                            <th>IOS XE XPath</th>
                             <td>{{ datapath['machine_id']|machine_id_to_prefixed }}</td>
                         </tr>
                         {% endif %}
                         {% if 'IOS XR' in datapath_oses|join %}
                         <tr>
-                            <th>XR XPath</th>
+                            <th>IOS XR XPath</th>
                             <td>{{ datapath['human_id'] }}</td>
                         </tr>
                         {% endif %}
