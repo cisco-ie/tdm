@@ -159,7 +159,7 @@ function restoreElement(elementId) {
                         {% if 'IOS XE' in datapath_oses|join %}
                         <tr>
                             <th>XE XPath</th>
-                            <td>{{ datapath['machine_id'][datapath['machine_id'].index('/'):] }}</td>
+                            <td>{{ datapath['machine_id']|machine_id_to_prefixed }}</td>
                         </tr>
                         {% endif %}
                         {% if 'IOS XR' in datapath_oses|join %}
