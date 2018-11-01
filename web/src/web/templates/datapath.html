@@ -161,12 +161,11 @@ function restoreElement(elementId) {
                             <th>Machine ID</th>
                             <td class="midvert">{{ datapath['machine_id'] }}</td>
                         </tr>
-                        {% if datapath_oses|length > 0 %}
+                        {% if 'YANG' in datapath_dmls %}
                         <tr>
                             <th>RFC 8040 XPath</th>
                             <td class="midvert">{{ datapath['machine_id']|machine_id_to_8040 }}</td>
                         </tr>
-                        {% endif %}
                         {% if 'IOS XE' in datapath_oses|join %}
                         <tr>
                             <th>IOS XE XPath</th>
@@ -178,6 +177,7 @@ function restoreElement(elementId) {
                             <th>IOS XR XPath</th>
                             <td class="midvert">{{ datapath['human_id'] }}</td>
                         </tr>
+                        {% endif %}
                         {% endif %}
                         <tr>
                             <th>Description</th>
@@ -192,6 +192,18 @@ function restoreElement(elementId) {
                                 {% endfor %}
                             {% else %}
                                 None (Container/Parent)
+                            {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Data Modeling Language</th>
+                            <td class="midvert">
+                            {% if datapath_dmls %}
+                                {% for dml in datapath_dmls %}
+                                {{ dml }}{{ ',' if not loop.last }}
+                                {% endfor %}
+                            {% else %}
+                                None
                             {% endif %}
                             </td>
                         </tr>

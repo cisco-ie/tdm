@@ -81,10 +81,16 @@ def datapath_details(_key):
             if dp_graph['datamodel_revision']:
                 dp_model = '%s@%s' % (dp_model, dp_graph['datamodel_revision'])
             datapath_models.add(dp_model)
+    datapath_dmls = set()
+    for dp_graph in fetch_datapath_dml_graph(_key):
+        dml_name = dp_graph['dml_name']
+        if dml_name:
+            datapath_dmls.add(dml_name)
     return flask.render_template('datapath.html',
         datapath=fetch_datapath(_key),
         datapath_models=datapath_models,
         datapath_oses=datapath_oses,
+        datapath_dmls=datapath_dmls,
         datapath_parent=fetch_datapath_parent(_key),
         datapath_children=fetch_datapath_children(_key),
         datapath_datatypes=fetch_datapath_datatype(_key),
@@ -105,6 +111,17 @@ def fetch_datapath_os_graph(_key):
     """
     bind_vars = {'key': _key}
     return query_db(datapath_os_graph_query, bind_vars, unlist=False)
+
+def fetch_datapath_dml_graph(_key):
+    datapath_dml_graph_query = """
+    LET datapath = DOCUMENT(CONCAT('DataPath/', @key))
+    FOR v, e, p IN 1..2 INBOUND datapath DataPathFromDataModel, OfDataModelLanguage
+    RETURN {
+        "datamodel_name": p.vertices[1].name,
+        "datamodel_revision": p.vertices[1].revision,
+        "dml_name": p.vertices[2].name,
+    }
+    """
 
 def fetch_datapath_mappings(_key):
     datapath_mappings_query = """
