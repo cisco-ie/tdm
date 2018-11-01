@@ -156,6 +156,18 @@ function restoreElement(elementId) {
                             <th>Machine ID</th>
                             <td>{{ datapath['machine_id'] }}</td>
                         </tr>
+                        {% if length(datapath_oses|select('in', 'IOS XE')) > 0 %}
+                        <tr>
+                            <th>IOS XE XPath</th>
+                            <td>{{ datapath['machine_id'][datapath['machine_id'].index('/'):] }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if length(datapath_oses|select('in', 'IOS XR')) > 0 %}
+                        <tr>
+                            <th>IOS XR XPath</th>
+                            <td>{{ datapath['human_id'] }}</td>
+                        </tr>
+                        {% endif %}
                         <tr>
                             <th>Description</th>
                             <td>{{ datapath['description'] }}</td>
