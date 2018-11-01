@@ -4,6 +4,11 @@
 {% block page_header %}DataPath Details{% endblock %}
 
 {% block head_includes %}
+<style>
+td {
+    vertical-align: middle;
+}
+</style>
 <script>
 window.addEventListener("load", function() {
     var mappingInputId = 'matchpath';
@@ -159,7 +164,7 @@ function restoreElement(elementId) {
                         {% if datapath_oses|length > 0 %}
                         <tr>
                             <th>RFC 8040 XPath</th>
-                            <th>{{ datapath['machine_id']|machine_id_to_8040 }}</th>
+                            <td>{{ datapath['machine_id']|machine_id_to_8040 }}</td>
                         </tr>
                         {% endif %}
                         {% if 'IOS XE' in datapath_oses|join %}
