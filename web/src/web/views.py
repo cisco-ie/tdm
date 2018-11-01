@@ -119,7 +119,7 @@ def fetch_datapath_dml_graph(_key):
     RETURN {
         "datamodel_name": p.vertices[1].name,
         "datamodel_revision": p.vertices[1].revision,
-        "dml_name": p.vertices[2].name,
+        "dml_name": p.vertices[2].name
     }
     """
     bind_vars = {'key': _key}
