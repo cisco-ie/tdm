@@ -5,7 +5,7 @@
 
 {% block head_includes %}
 <style>
-td {
+td.midvert {
     vertical-align: middle;
 }
 </style>
@@ -155,28 +155,28 @@ function restoreElement(elementId) {
                     <tbody>
                         <tr>
                             <th>Human ID</th>
-                            <td>{{ datapath['human_id'] }}</td>
+                            <td class="midvert">{{ datapath['human_id'] }}</td>
                         </tr>
                         <tr>
                             <th>Machine ID</th>
-                            <td>{{ datapath['machine_id'] }}</td>
+                            <td class="midvert">{{ datapath['machine_id'] }}</td>
                         </tr>
                         {% if datapath_oses|length > 0 %}
                         <tr>
                             <th>RFC 8040 XPath</th>
-                            <td>{{ datapath['machine_id']|machine_id_to_8040 }}</td>
+                            <td class="midvert">{{ datapath['machine_id']|machine_id_to_8040 }}</td>
                         </tr>
                         {% endif %}
                         {% if 'IOS XE' in datapath_oses|join %}
                         <tr>
                             <th>IOS XE XPath</th>
-                            <td>{{ datapath['machine_id']|machine_id_to_prefixed }}</td>
+                            <td class="midvert">{{ datapath['machine_id']|machine_id_to_prefixed }}</td>
                         </tr>
                         {% endif %}
                         {% if 'IOS XR' in datapath_oses|join %}
                         <tr>
                             <th>IOS XR XPath</th>
-                            <td>{{ datapath['human_id'] }}</td>
+                            <td class="midvert">{{ datapath['human_id'] }}</td>
                         </tr>
                         {% endif %}
                         <tr>
