@@ -158,13 +158,13 @@ function restoreElement(elementId) {
                         </tr>
                         {% if 'IOS XE' in datapath_oses|join %}
                         <tr>
-                            <th>IOS XE XPath</th>
+                            <th>XE XPath</th>
                             <td>{{ datapath['machine_id'][datapath['machine_id'].index('/'):] }}</td>
                         </tr>
                         {% endif %}
                         {% if 'IOS XR' in datapath_oses|join %}
                         <tr>
-                            <th>IOS XR XPath</th>
+                            <th>XR XPath</th>
                             <td>{{ datapath['human_id'] }}</td>
                         </tr>
                         {% endif %}
