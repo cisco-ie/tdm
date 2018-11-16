@@ -798,7 +798,18 @@ def construct_search_form(es=False):
         search_form = forms.SearchFormES()
     else:
         search_form = forms.SearchForm()
-    search_form.oses.choices = [(pair, pair) for pair in fetch_os_releases()]
+    # TODO: Remove when OS bugs are addressed
+    oses = [(pair, pair) for pair in fetch_os_releases()]
+    os_exclude = {
+        'IOS XR - 5.3.0', 'IOS XR - 5.3.1', 'IOS XR - 5.3.2',
+        'IOS XR - 5.3.3', 'IOS XR - 5.3.4', 'IOS XR - 6.0.0',
+        'IOS XR - 6.0.1', 'IOS XR - 6.1.1', 'IOS XR - 6.3.2',
+        'IOS XR - 6.4.1', 'IOS XR - 6.4.2', 'IOS XE - 16.3.1',
+        'IOS XE - 16.3.2', 'IOS XE - 16.4.1'
+    }
+    oses_bandaid = list(set(oses) - os_exclude)
+    oses_bandaid.sort()
+    search_form.oses.choices = oses_bandaid
     search_form.dmls.choices = [(pair, pair) for pair in fetch_dmls()]
     return search_form
 
