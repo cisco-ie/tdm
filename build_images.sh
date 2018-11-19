@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-cd etl
-docker build -t tdm/etl .
-cd ..
-cd web
-docker build -t tdm/web .
-cd ..
+docker build -t tdm/etl etl/
+docker build -t tdm/web web/
+docker build -t tdm/doc doc/

@@ -8,7 +8,7 @@ volumes:
   nginx_logs:
   goaccess_report:
   search_storage:
-  help_storage:
+  doc_storage:
 
 services:
   dbms:
@@ -44,12 +44,12 @@ services:
       - FLASK_ENV=production
     networks:
       - backend
-  help_build:
-    image: tdm/help
+  doc_build:
+    image: tdm/doc
     volumes:
     - type: volume
-      source: help_storage
-      target: /data/.vuepress/dist
+      source: doc_storage
+      target: /data/docs/.vuepress/dist
   nginx:
     image: nginx:alpine
     ports:
@@ -76,8 +76,8 @@ services:
         target: /srv/goaccess
         read_only: true
       - type: volume
-        source: help_storage
-        target: /srv/help
+        source: doc_storage
+        target: /srv/doc
         read_only: true
       - "./nginx/nginx.conf:/etc/nginx/nginx.conf:ro"
   goaccess:

@@ -1,6 +1,8 @@
 FROM node:alpine
-RUN yarn global add vuepress@next
 WORKDIR /data/
-COPY docs/ /data/
-ENTRYPOINT [ "vuepress" ]
-CMD [ "build" ]
+RUN wget https://github.com/remingtonc/vuepress/archive/no-dist-delete.tar.gz
+RUN tar --extract --gzip --file no-dist-delete.tar.gz --strip=1 
+RUN yarn
+COPY docs/ /data/docs
+ENTRYPOINT [ "yarn" ]
+CMD [ "run", "vuepress", "build", "docs" ]
