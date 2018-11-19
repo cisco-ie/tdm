@@ -3,7 +3,7 @@
 
 TDM provides an offline, immutable view into advertised data availability from data models, with search affordance to quickly identify data of interest and the capability to map between data to aid in keeping track of what is roughly equivalent to what.
 
-![Index Screenshot](/doc/img/index.png)
+![Index Screenshot](/doc/docs/.vuepress/public/img/index.png)
 
 For example, discovering and mapping...
 
@@ -21,10 +21,10 @@ In its current state, network telemetry can be accessed in many different ways t
 TDM seeks to solve this problem by providing a simple schema to model all forms of accessing network telemetry and capability to create relationships between individual data points to demonstrate qualities in consistency, validity, and interoperability. More documentation can be found in [doc/](/doc/).
 
 ### Architecture
-![Architecture](/doc/img/tdm_arch.png)
+![Architecture](/doc/docs/.vuepress/public/img/tdm_arch.png)
 
 ### Schema
-![TDM Schema](/doc/img/tdm_schema.png)
+![TDM Schema](/doc/docs/.vuepress/public/img/tdm_schema.png)
 
 ## Usage
 

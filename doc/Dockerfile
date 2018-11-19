@@ -1,5 +1,6 @@
 FROM node:alpine
 RUN yarn global add vuepress@next
-COPY . /data/
+WORKDIR /data/
+COPY docs/ /data/
 ENTRYPOINT [ "vuepress" ]
-CMD [ "dev" ]
+CMD [ "build" ]
