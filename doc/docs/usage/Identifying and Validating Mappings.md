@@ -45,10 +45,12 @@ This is also valuable for determining if two Data Paths which look similar by Hu
 ### Domain Specific Knowledge
 TDM is well suited to helping to identify domain-specific knowledge related Data Paths. Domain specific knowledge is easily represented by keyword-like searches which is what TDM's Search functionality is most suited for. The above section is effectively an attempt to decompose the structure of the Data Paths into more generic ideas. `bgp neighbor messages sent` is more easily communicated than `/Cisco-IOS-XR-ipv4-bgp-oper:bgp/instances/instance/instance-active/default-vrf/neighbors/neighbor/messages-sent`. Attempt to use generic, yet specific, terms and you'll likely have some success identifying information you're interested in.
 
-## Evaluating Similar Data Paths
+## Retrieving Data Path Data
 Once we've identified similar Data Paths, we have a responsibility to verify that these Data Paths return equivalent data before mapping them in TDM. Leading others down a rabbit hole of incorrect information is irresponsible and rather infuriating. Ensuring that the data in TDM is high-quality and trustworthy is a requirement for its success as a platform for finding this kind of information. If incorrect data or mappings are identified, flag them for explanation or removal.
 
-This section will go over how to retrieve Data Paths currently available in TDM, and begin evaluating the data returned.
+The data returned from different Data Paths, which we map as equivalent, do not necessarily require having the same structure of data returned, but they do require having the same data (as in values) returned. For instance, an OID does not return as XML, however YANG XPaths via NETCONF will, or even as JSON via gRPC. It requires looking at the data which is returned, and determining if that data, despite potential structural differences, is as close to a parity match as possible.
+
+This section will go over how to retrieve Data Paths currently available in TDM in order to begin evaluating the data returned.
 
 ### YANG XPath
 YANG module data is represented as a TDM Data Path via its XPaths. To explore YANG XPaths, we will utilize the very useful [Advanced NETCONF Explorer](https://github.com/cisco-ie/anx) which presents an intuitive GUI interface via the web browser for exploring an online device's YANG modules.
@@ -68,5 +70,13 @@ docker run --name anx -d -p 9269:8080 cisco-ie/anx
 # Open browser to <host>:9269
 ```
 
+Once the browser has been navigated to your instance of ANX, you will login to your NETCONF-enabled device, and using the ANX interface find the desired XPath, and perform a NETCONF get against the desired XPath to view its data.
+
 ### MIB OID (SNMP)
-SNMP MIB data is represented as a TDM Data Path via its OIDs. To explore OIDs, we will utilize the venerable `snmpwalk` which has been around for years and is always reliable. `snmpwalk` can sometimes be a little bit nuanced, but we will try to get its basic usage down.
+SNMP MIB data is represented as a TDM Data Path via its OIDs. To explore OIDs, we will utilize the venerable [`snmpwalk`](http://net-snmp.sourceforge.net/tutorial/tutorial-5/commands/snmpwalk.html). `snmpwalk` has its nuances, but we will try to get its basic usage down. OIDs are a little bit strange in the sense that the OIDs defined by MIBs are not necessarily the total definition of what is available. OIDs can be variable past what's visibile purely from the MIB definition. `snmpwalk` traverses all of the values of the specified OID, and returns their values.
+
+
+After an OID Data Path has been identified, a simple `snmpwalk -v 2c -c public <host> <oid>` will return all of the OID data.
+
+## Evaluating Similar Data Paths
+There is not a lot of concrete advice on this topic other than using common sense and looking hard at the data returned from the above section. The data may come out in a different format, but if it is consistent in value then it is worth a match in TDM to assist all those that would look for an equivalent Data Path in the future. If you are able to determine a relevant Data Path, which returns the same data, then you have likely found a worthwhile match for TDM.
