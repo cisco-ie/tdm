@@ -51,7 +51,7 @@ services:
     networks:
       - backend
   doc_build:
-    image: tdm/help
+    image: tdm/doc
     volumes:
     - type: volume
       source: doc_storage
