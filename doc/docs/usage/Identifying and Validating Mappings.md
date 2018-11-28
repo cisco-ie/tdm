@@ -53,6 +53,7 @@ The data returned from different Data Paths, which we map as equivalent, do not 
 ### YANG XPath
 YANG module data is represented as a TDM Data Path via its XPaths. To explore YANG XPaths, we will utilize the very useful [Advanced NETCONF Explorer](https://github.com/cisco-ie/anx) which presents an intuitive GUI interface via the web browser for exploring an online device's YANG modules.
 
+#### Installation
 ANX needs to be deployed on a server which is able to reach a NETCONF-enabled online device. Actual installation of ANX is out of the scope of this document, but a quick overview using Docker:
 
 ```bash
@@ -62,12 +63,14 @@ ssh <host>
 git clone https://github.com/cisco-ie/anx.git
 # If git is not available...
 wget https://github.com/cisco-ie/anx/archive/master.tar.gz && tar -xzf master.tar.gz && rm master.tar.gz && mv anx-master anx
+# Build & run ANX
 cd anx
 docker build -t cisco-ie/anx .
 docker run --name anx -d -p 9269:8080 cisco-ie/anx
 # Open browser to <host>:9269
 ```
 
+#### Usage
 An example flow for retrieving XPath `openconfig-interfaces:interfaces/interface/state/name`:
 
 1. Open your browser to the running instance of ANX.
@@ -85,12 +88,79 @@ An example flow for retrieving XPath `openconfig-interfaces:interfaces/interface
 ![ANX 7, 8, and 9](/doc/img/anx_2.png)
 
 ### MIB OID (SNMP)
-SNMP MIB data is represented as a TDM Data Path via its OIDs. To explore OIDs, we will utilize the venerable [`snmpwalk`](http://net-snmp.sourceforge.net/tutorial/tutorial-5/commands/snmpwalk.html). `snmpwalk` has its nuances, but we will try to get its basic usage down. OIDs are a little bit strange in the sense that the OIDs defined by MIBs are not necessarily the total definition of what is available. OIDs can be variable past what's visibile purely from the MIB definition. `snmpwalk` traverses all of the values of the specified OID, and returns their values.
+SNMP MIB data is represented as a TDM Data Path via its OIDs. To explore OIDs, we will utilize the venerable [`net-snmp`](http://www.net-snmp.org/docs/man/) tools, specifically [`snmpwalk`](http://net-snmp.sourceforge.net/tutorial/tutorial-5/commands/snmpwalk.html). `snmpwalk` has its nuances, but we will try to get its basic usage down. OIDs are a little bit strange in the sense that the OIDs defined by MIBs are not necessarily the total definition of what is available. OIDs can be variable past what's visible purely from the MIB definition. `snmpwalk` traverses all of the values of the specified OID, and returns their values.
 
 After an OID Data Path has been identified, a simple `snmpwalk -v 2c -c public <host> <oid>` will return all of the OID data.
 
+#### Installation
+SNMP tooling as an ecosystem is somewhat complicated to correctly install. This section will detail how to install the Cisco MIBs for usage with `net-snmp`.
+
+Fortunately, `net-snmp` is very easy to install. It's effectively a standard package in the Unix-like ecosystem. For example, on Debian/Ubuntu, simply issue `apt install snmp`. In some cases it might already be present on your system!
+
+Unfortunately `net-snmp` doesn't always come with the latest standard MIBs by default. On Debian/Ubuntu we can use `apt install snmp-mibs-downloader` to download several industry standard MIBs. For other distributions, you will have to do some searching and validation that your MIBs are the latest.
+
+To use Cisco's MIBs, we first need to acquire them. Cisco has a mirror of SNMP-related information at [ftp://ftp.cisco.com/](ftp://ftp.cisco.com/). We will very specifically download the SMIv2 MIBs located at [ftp://ftp.cisco.com/pub/mibs/v2/](ftp://ftp.cisco.com/pub/mibs/v2/) - if you don't know what this means then you will likely be okay with just this set. An example for Debian/Ubuntu, `wget --mirror --no-host-directories --cut-dirs=3 --directory-prefix=/usr/share/snmp/mibs/ --wait=1 ftp://ftp.cisco.com/pub/mibs/v2/`. This may take some time.
+
+
+#### Example
+An example setup for retrieving OID `ifName`:
+
+`snmpwalk -Oaf -v 2c -c public <hostname> ifName 2>/dev/null`  
+```
+.iso.org.dod.internet.mgmt.mib-2.ifMIB.ifMIBObjects.ifXTable.ifXEntry.ifName.1 = STRING: Gi0/0
+.iso.org.dod.internet.mgmt.mib-2.ifMIB.ifMIBObjects.ifXTable.ifXEntry.ifName.2 = STRING: Nu0
+.iso.org.dod.internet.mgmt.mib-2.ifMIB.ifMIBObjects.ifXTable.ifXEntry.ifName.3 = STRING: VLAN-1
+...
+```
+
 ## Evaluating Similar Data
 There is not a lot of concrete advice on this topic other than using common sense and looking hard at the data returned from the above section. The data may come out in a different format, but if it is consistent in value then it is worth a match in TDM to assist all those that would look for an equivalent Data Path in the future. If you are able to determine a relevant Data Path, which returns the same data, then you have likely found a worthwhile match for TDM.
+
+Let's correlate our data from the last two examples, XPath `openconfig-interfaces:interfaces/interface/state/name` and OID `ifName`.
+
+### `openconfig-interfaces:interfaces/interface/state/name`
+Retrieved via ANX.
+
+```xml
+<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+  <interfaces xmlns="http://openconfig.net/yang/interfaces">
+   <interface>
+    <name>Loopback0</name>
+    <state>
+     <name>Loopback0</name>
+    </state>
+   </interface>
+   <interface>
+    <name>HundredGigE0/0/0/0</name>
+    <state>
+     <name>HundredGigE0/0/0/0</name>
+    </state>
+   </interface>
+   <interface>
+    <name>HundredGigE0/0/0/1</name>
+    <state>
+     <name>HundredGigE0/0/0/1</name>
+    </state>
+   </interface>
+   ...
+  </interfaces>
+ </data>
+```
+
+### `ifName`
+`snmpwalk -Oa -v 2c -c public <hostname> ifName 2>/dev/null`
+
+```
+...
+IF-MIB::ifName.41 = STRING: Loopback0
+IF-MIB::ifName.42 = STRING: HundredGigE0/0/0/0
+IF-MIB::ifName.43 = STRING: HundredGigE0/0/0/35
+IF-MIB::ifName.44 = STRING: HundredGigE0/0/0/34
+...
+```
+
+### Conclusion
+We can see that, despite the structure of information being different, the values are indeed effectively the same. It's worth stating that `ifName` had more information including many optics, but we can safely say the information is so similar that we should consider these equivalent Data Paths and add that mapping within TDM. Another example of reasonably similar data would be if one returned the values in format `HundredGigE0_0_0_0` vs. `HundredGigE0/0/0/0` - this is effectively the same information despite its formatting being different. If it is expressing the same thing, it is worth mapping in TDM for other's usage.
 
 ## Final Note
 Once we've identified similar Data Paths, we have a responsibility to verify that these Data Paths return equivalent data before mapping them in TDM. Leading others down a rabbit hole of incorrect information is irresponsible and rather infuriating. Ensuring that the data in TDM is high-quality and trustworthy is a requirement for its success as a platform for finding this kind of information. If incorrect data or mappings are identified, flag them for explanation or removal.
