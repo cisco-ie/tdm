@@ -15,10 +15,10 @@ For example, discovering and mapping...
 | ...                | ...                                                                                                                 |
 
 ## Problem Statement
-In its current state, network telemetry can be accessed in many different ways that are not easily reconciled – for instance, finding the same information in SNMP MIBs and YANG models. There is no way of determining if the information gathered will have the same values, or which is more accurate than another. Further, the operational methods of deploying this monitoring varies across platforms and implementations. This makes networking monitoring a fragmented ecosystem of inconsistent and unverified data.
+In its current state, network telemetry can be accessed in many different ways that are not easily reconciled – for instance, finding the same information in SNMP MIBs and NETCONF/YANG modules. Discovering the datapaths is often tedious and somewhat arcane, and there is no way of determining if the information gathered will have the same values, or which is more accurate than another. Further, the operational methods of deploying this monitoring varies across platforms and implementations. This makes networking monitoring a fragmented ecosystem of inconsistent and unverified data. There needs to be manageability, and cross-domain insight into data availability.
 
 ## Solution
-TDM seeks to solve this problem by providing a simple schema to model all forms of accessing network telemetry and capability to create relationships between individual data points to demonstrate qualities in consistency, validity, and interoperability. More documentation can be found in [doc/](/doc/).
+TDM seeks to solve this problem by providing an overlay platform to generically access network telemetry and capability purported to be supported by an OS/release or platform, and create relationships between individual datapaths to demonstrate qualities in consistency, validity, and interoperability. This will be both exposed by UI for human usage, and API for automated usage. TDM will not seek to provide domain-specific manageability, but serve as an overlay insight tool. There is significantly more documentation in [doc/](/doc/).
 
 ### Architecture
 ![Architecture](/doc/docs/.vuepress/public/img/tdm_arch.png)
