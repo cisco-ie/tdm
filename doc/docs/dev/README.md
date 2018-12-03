@@ -6,17 +6,9 @@
 ## [Crash Course](Crash%20Course.md)
 A crash course in concepts underlying TDM and some brief technology introductions.
 
-## [Architecture](Architecture.md)
-This document covers the architecture and deployment decisions of TDM.
+## [Architecture](architecture/)
+This document covers the architecture and technologies of TDM.
 
 ![Architecture Image](/doc/img/tdm_arch.png)
-
-## [Database Schema](Schema.md)
-This document covers the details of TDM's databases in detail.
-
-![Database Schema Image](/doc/img/tdm_schema.png)
-
-## [Components](components/)
-This document covers each component of TDM in detail.
 
 ## [Cool Stuff](Cool%20Stuff.md)

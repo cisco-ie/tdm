@@ -1,47 +1,195 @@
-# Example Queries
-Queries that are usable in the ArangoDB UI. Outputs are all examples. HIGHLY recommend usage of `LIMIT` statements at reasonable points of the query. None of these queries are guaranteed to be "the best." :)
+# Database
+TDM's parsed source-of-truth resides in ArangoDB. ArangoDB is a powerful graph database which enables NoSQL-like storage models and relational queries.
 
-* [Retrievals](#retrievals)- [Example Queries](#example-queries)
-  - [Retrievals](#retrievals)
-    - [Filtered DataPath Leaves](#filtered-datapath-leaves)
-      - [Query](#query)
-      - [Output](#output)
-    - [OS and Releases](#os-and-releases)
-      - [Query](#query-1)
-      - [Output](#output-1)
-    - [OS/Release Owned DataModels](#osrelease-owned-datamodels)
-      - [Query](#query-2)
-      - [Output](#output-2)
-    - [OS/Release Owned DataModels and DataPaths](#osrelease-owned-datamodels-and-datapaths)
-      - [Query](#query-3)
-      - [Output](#output-3)
-    - [OS/Release DataPaths](#osrelease-datapaths)
-      - [Query](#query-4)
-      - [Output](#output-4)
-    - [Common OS/Release DataPaths](#common-osrelease-datapaths)
-      - [Query](#query-5)
-      - [Output](#output-5)
-    - [Retrieve Matching DataPaths](#retrieve-matching-datapaths)
-      - [Query](#query-6)
-      - [Output](#output-6)
-    - [Retrieve DataPath Calculations](#retrieve-datapath-calculations)
-      - [Query](#query-7)
-      - [Output](#output-7)
-    - [Retrieve Unmatched DataPaths](#retrieve-unmatched-datapaths)
-      - [Query](#query-8)
-      - [Output](#output-8)
-    - [Retrieve Collection Counts](#retrieve-collection-counts)
-      - [Query](#query-9)
-      - [Output](#output-9)
-    - [Retrieve OS/Releases linked to a DataPath](#retrieve-osreleases-linked-to-a-datapath)
-      - [Query](#query-10)
-      - [Output](#output-10)
-    - [Retrieve per-DataModelLanguage DataPaths with Matches](#retrieve-per-datamodellanguage-datapaths-with-matches)
-      - [Query](#query-11)
-      - [Output](#output-11)
-    - [Search DataPaths per OS/Release/DataModelLanguage/DataModel](#search-datapaths-per-osreleasedatamodellanguagedatamodel)
-      - [Query](#query-12)
-      - [Output](#output-12)
+[[toc]]
+
+## Schema
+TDM has a relatively simple schema. ArangoDB helps express it simply as well.
+
+![Database Schema Image](/doc/img/tdm_schema.png)
+
+### Entities (Collections)
+
+#### DataPath
+The most basic representation of a "path" to data which can be transformed and formatted for control protocols to retrieve the data.
+
+* **machine_id**  
+The path/identifier which is qualified, unique, and most used by definition in the machine. The machine_id must be unique in the system.
+* human_id  
+The path/identifier which is colloquially used by humans to communicate the data path.
+* description  
+The description provided for the data to be returned.
+* is_leaf  
+Whether the data path returns a leaf-like value such as an integer. Indicates a pointer to data which is unable to be further traversed.
+* is_variable  
+Whether the data path is unable to be directly indexed.
+* is_configurable  
+Whether the data path represents something which is able to be configured. Effectively, a "write" property.
+* verified  
+Whether the data path has been verified and should absolutely be trusted. If it is not verified, there is a potential for it to be in error.
+
+#### DataModel
+The data model which provides the definition/schema of available data which we may derive DataPaths to.
+
+* content  
+The unparsed content of the data model.
+* **name**  
+The name or filename of the data model.
+* **parsed_checksum**  
+The checksum of the data paths parsed from the data model. This is not currently implemented.
+* **revision**  
+The revision of the data model.
+
+#### DataModelLanguage
+The known and defined language of data modeling which a DataModel is written in.
+
+* **name**
+* description
+
+#### OS
+The operating system which DataModels may apply to.
+
+* **name**  
+e.g. IOS XR
+* description
+
+#### Release
+The OS Release which DataModels may apply to.
+
+* **name**  
+e.g. 6.5.1
+* description
+
+#### ControlProtocol
+The known and defined protocol which is capable of transforming or utilizing DataModels or DataPaths to retrieve data.
+
+* **name**  
+e.g. NETCONF
+* description
+
+#### TransportProtocol
+The known and defined protocol which a ControlProtocol may operate over.
+
+* **name**  
+e.g. HTTP
+* description
+
+#### Encoding
+The encoding of the data which a DataPath is communicated via a ControlProtocol and over the TransportProtocol.
+
+* **name**  
+e.g. JSON
+* description
+  
+#### DataType
+The defined data type that a data point in a DataPath is defined to return.
+
+* **name**
+* description
+* is_primitive
+
+#### Device
+A physical device which may have data models and should have corresponding data paths.
+
+* **name**
+* description
+
+#### Calculation
+A defined calculation which may be used to indicate that a DataPath is calculated via other DataPaths. This does not attempt to maintain order of operations. Order of operations must be maintained in the equation/description and will not automatically apply.
+
+* name  
+An apt naming for the calculation, for human consumption.
+* description
+* equation
+* author
+
+### Relationships (Edges)
+
+#### DeviceHasDataPath
+Indicates that it has been validated that a Device does have a specified DataPath available.
+
+* os
+* release
+
+#### DeviceHasDataModel
+Indicates that it has been validated that a Device does have a specified DataModel.
+
+* os
+* release
+
+#### OSHasRelease
+OS ownership of a specific Release name.
+
+#### ReleaseHasDataModel
+Indication that, theoretically, a specific Release should have a DataModel.
+
+#### ReleaseRevision
+Indicates that a Release is a revision of another Release.
+
+#### DataPathFromDataModel
+Indicates that a specific DataPath is derivative of a certain DataModel.
+
+* parse_timestamp
+
+#### OfDataModelLanguage
+Indicates that a DataModel is written in the linked DataModelLanguage.
+
+#### HasControlProtocol
+Indicates that a DataModelLanguage may be manipulated by the linked ControlProtocol.
+
+#### HasEncoding
+Indicates that a ControlProtocol supports the linked Encoding.
+
+#### HasTransportProtocol
+Indicates that a ControlProtocol supports the linked TransportProtocol.
+
+#### DataPathMatch
+Indicates that the linked DataPaths are equivalent.
+
+* timestamp  
+Time of match indication.
+* author  
+Submitter of match.
+* validated  
+Whether a match is trustworthy.
+* weight  
+-1..+inf. -1 indicates incongruent.
+* annotation  
+Human consumable annotation of match.
+* needs_human  
+Indicates incompatible for machine consumption.
+
+#### DataPathParent
+Indicates that a DataPath is a parent of another DataPath.
+
+#### DataPathChild
+Indicates that a DataPath is a child of another DataPath.
+
+#### OfDataType
+Indicates that a DataPath is of data type DataType.
+
+* parse_timestamp
+
+#### DataModelChild
+Demonstrates revision child relationships in DataModels.
+
+#### DataModelParent
+Demonstrates revision parent relationships in DataModels.
+
+#### DataModelDerivedFrom
+Indicates that this DataModel is not a standalone DataModel and is actually converted or generated from the existing, linked DataModel.
+
+#### InCalculation
+Indicates that a DataPath is within the specified Calculation.
+
+#### CalculationResult
+Indicates that a DataPath is a result of the specified Calculation.
+
+#### DataModelLanguageHasDataType
+Indicates that a DataType is defined within a DataModelLanguage.
+
+## Example AQL
+Queries that are usable in the ArangoDB UI. Outputs are all examples. HIGHLY recommend usage of `LIMIT` statements at reasonable points of the query. None of these queries are guaranteed to be "the best." :)
 
 ## Retrievals
 
