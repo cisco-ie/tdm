@@ -1,31 +1,7 @@
 # TDM Crash Course
 This document aims to rapidly get technical users up to speed on concepts/technologies behind TDM to more effectively understand what is happening and begin developing. This crash course does not cover any information regarding validation, such as how to request the data - only how to go about parsing the data models. This also assumes some level of familiarity with basic terminology such as "CLI".
 
-- [Data Sources](#data-sources)
-  - [Foreword](#foreword)
-  - [CLI](#cli)
-    - [CLI Example (Path)](#cli-example-path)
-  - [MIBs (SNMP)](#mibs-snmp)
-    - [OID Example (Path)](#oid-example-path)
-    - [Data Model Exploration](#data-model-exploration)
-    - [Data Exploration](#data-exploration)
-  - [YANG Modules (NETCONF, RESTCONF, gRPC)](#yang-models-netconf-restconf-grpc)
-    - [XPath Example (Path)](#xpath-example-path)
-    - [Data Model Exploration](#data-model-exploration-1)
-    - [Data Exploration](#data-exploration-1)
-  - [DME (NX-API, NX-OS Streaming Telemetry)](#dme-nx-api-nx-os-streaming-telemetry)
-    - [DN Example](#dn-example)
-    - [Data Model Exploration](#data-model-exploration-2)
-    - [Data Exploration](#data-exploration-2)
-- [Development](#development)
-  - [Docker](#docker)
-  - [ArangoDB](#arangodb)
-  - [Elasticsearch](#elasticsearch)
-- [Learning Resources](#learning-resources)
-  - [Videos](#videos)
-  - [xrdocs.github.io](#xrdocsgithubio)
-  - [DevNet](#devnet)
-  - [dCloud](#dcloud)
+[[toc]]
 
 ## Data Sources
 

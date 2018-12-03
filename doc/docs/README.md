@@ -17,7 +17,6 @@ TDM seeks to solve this problem by providing a platform to generically access ne
 
 ![TDM UI](/doc/img/index.png)
 
-### Elaboration
 We are seeking to alleviate two major problems using TDM.
 
 1. The same data is addressed differently across platforms.
