@@ -28,7 +28,7 @@ There are actually a lot of missing pieces to the MIB loading into TDM. This is 
 3) Parse JSON representation into MIB & OID relationships.
 4) Load relationships into TDM as MIB (DataModel) -> OID (DataPath).
 
-What is the big missing piece? The linking of Data Models to Operating Systems/Release versions. Given the SNMP legacy, that kind of release process data just simply doesn't seem to exist via an easily consumable API (please open an issue to tell me I am wrong). For Cisco at least, we can get some level of insight via [supportlists](ftp://ftp.cisco.com/pub/mibs/supportlists/) but these tend to lean towards being semi-hand-written HTML documents and not very machine consumable. Hence, business problem. :)
+What is the big missing piece? The linking of Data Models to Operating Systems/Release versions. Given the SNMP legacy, that kind of release process data just simply doesn't seem to exist via an easily consumable API (please open an issue to tell me I am wrong). For Cisco at least, we can get some level of insight via supportlists at `ftp://ftp.cisco.com/pub/mibs/supportlists/`, but these tend to lean towards being semi-hand-written HTML documents and not very machine consumable. Hence, business problem. :)
 
 ### YANG Models
 The YANG model loading process is far more complete than the MIBs. This is thanks to a vastly better release process of data models and metadata for the OS via the [YangModels/yang](https://github.com/YangModels/yang/tree/master/vendor/cisco) repository. Currently TDM parses data directly from the YANG repository but it is likely a better idea to re-engineer this pipeline around [YANG Catalog](https://yangcatalog.org/) which is an overlay of the repository and has APIs for even more metadata we can use.
@@ -36,7 +36,7 @@ The YANG model loading process is far more complete than the MIBs. This is thank
 1. `git clone https://github.com/YangModels/yang.git`
 2. Skip other vendors or YANG models, go straight to [Cisco](https://github.com/YangModels/yang/tree/master/vendor/cisco).
 3. Per OS, per release, parse YANG models via `pyang` into a Python dictionary.
-4. Load OS -> Release -&- Data Model Language (YANG) -> Data Model (YANG Model) -> Data Path (XPath) into TDM. (There is some *really* ugly caching going on here as well that needs to be fixed).
+4. Load `OS -> Release -&- Data Model Language (YANG) -> Data Model (YANG Model) -> Data Path (XPath)` into TDM. There is some *really* ugly caching going on here as well that needs to be fixed.
 
 The YANG ETL process is currently wildly inefficient. Like 7 GB RAM inefficient. It happened, it was glossed over, it was not looked at again in favor of our nice Web value-add interface. It needs to be looked at again.
 

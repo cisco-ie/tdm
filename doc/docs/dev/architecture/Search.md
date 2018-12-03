@@ -1,7 +1,7 @@
 # Search
-Search in TDM is based off of ElasticSearch. Initial Search using ArangoDB was effective, but extremely latent and resource intensive. Some broad terms resulted in ~60GB memory usage and took nearly a minute to return. In contrast, ElasticSearch returns in fractions of a second and holds at a steady ~1-2GB memory usage.
+Search in TDM is based off of Elasticsearch. Initial Search using ArangoDB was effective, but extremely latent and resource intensive. Some broad terms resulted in ~60GB memory usage and took nearly a minute to return. In contrast, Elasticsearch returns in fractions of a second and holds at a steady ~1-2GB memory usage.
 
-ElasticSearch is *not* a source-of-truth for TDM. ElasticSearch should always be thought of as a cache of data which could potentially be out-of-sync with the ArangoDB instance of TDM which all other operations use. ElasticSearch is very-specifically a pointed, use-case solution to the original searchability issues.
+Elasticsearch is *not* a source-of-truth for TDM. Elasticsearch should always be thought of as a cache of data which could potentially be out-of-sync with the ArangoDB instance of TDM which all other operations use. Elasticsearch is very-specifically a pointed, use-case solution to the original searchability issues.
 
 ## Indexing
 Setup the index in ES for our data. Derived from:
@@ -127,7 +127,7 @@ This index specifies a custom analyzer and provides the `machine_id` and `human_
 Loading of the data takes every permutation of a DataPath and its OS/Releases and creates a new document per permutation. This is not necessarily the *best* way to go about loading the data, but it was the clearest path forward. This does mean that there is a significant duplication albeit unique/qualified in document.
 
 ## Query
-The ElasticSearch query in its current form performs an aggregation on the DataPath `human_id`. The results are ordered according to relevancy per the scoring of the query. An example query form is presented below.
+The Elasticsearch query in its current form performs an aggregation on the DataPath `human_id`. The results are ordered according to relevancy per the scoring of the query. An example query form is presented below.
 
 ```json
 {
