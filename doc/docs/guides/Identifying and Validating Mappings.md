@@ -6,7 +6,7 @@ Identifying and validating the mappings between Data Paths can be the most frust
 ## Identifying Relevant Data
 "Identifying Relevant Data" may have different meaning to different people. Some will have existing data they would like to find equivalents for, like finding the NETCONF/YANG XPath equivalent of the SNMP OID `ifName`. Others will have domain knowledge that they would like to find more data about, such as information about a "BGP neighbor".
 
-TDM can aid in finding this data via Search. TDM's Search is built with [ElasticSearch](https://www.elastic.co/products/elasticsearch), a powerful search and analytics engine. In Search, we compare the Human ID, Machine ID, and Description of each Data Path to the keywords in the query to determine the relevancy of each Data Path.
+TDM can aid in finding this data via [Search](/dev/architecture/Search.md). TDM's Search is built with [Elasticsearch](https://www.elastic.co/products/elasticsearch), a powerful search and analytics engine. In Search, we compare the Human ID, Machine ID, and Description of each Data Path to the keywords in the query to determine the relevancy of each Data Path.
 
 ### Identifying Similar Data Paths
 One of the reasons TDM exists is due to the desire to upgrade from SNMP to Model-Driven Telemetry. Most of the time, the data exposed by SNMP and Model-Driven Telemetry is not the same despite representing some of the same information. Most existing monitoring infrastructure already has the SNMP OIDs being monitored, and the requirement moving forward is to find the equivalent YANG XPaths for Model-Driven Telemetry. The following are some quick guidelines for how to use your existing data to find your new desired data with the help of TDM's Search.
@@ -106,7 +106,7 @@ Fortunately, `net-snmp` itself is very easy to install. It is effectively a stan
 
 Unfortunately, `net-snmp` does not always come with the latest standard MIBs by default. On Debian/Ubuntu we can use `apt install snmp-mibs-downloader` to download several industry standard MIBs. For other distributions, you will have to do some searching and validation that your MIBs are the latest.
 
-To use Cisco's MIBs, we first need to acquire them. Cisco has a mirror of SNMP-related information at [ftp://ftp.cisco.com/](ftp://ftp.cisco.com/). We will very specifically download the v2 MIBs located at [ftp://ftp.cisco.com/pub/mibs/v2/](ftp://ftp.cisco.com/pub/mibs/v2/) - if you don't know what this means then you will likely be okay with just this set. An example for Debian/Ubuntu, `wget --mirror --no-host-directories --cut-dirs=3 --directory-prefix=/usr/share/snmp/mibs/ --wait=1 ftp://ftp.cisco.com/pub/mibs/v2/`. This may take some time.
+To use Cisco's MIBs, we first need to acquire them. Cisco has a mirror of SNMP-related information at `ftp://ftp.cisco.com/`. We will very specifically download the v2 MIBs located at `ftp://ftp.cisco.com/pub/mibs/v2/` - if you don't know what this means then you will likely be okay with just this set. An example for Debian/Ubuntu, `wget --mirror --no-host-directories --cut-dirs=3 --directory-prefix=/usr/share/snmp/mibs/ --wait=1 ftp://ftp.cisco.com/pub/mibs/v2/`. This may take some time.
 
 
 #### Example

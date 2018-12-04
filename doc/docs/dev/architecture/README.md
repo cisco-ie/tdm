@@ -1,5 +1,5 @@
 # Architecture
-TDM uses a collection of powerful technologies and application code to accomplish its goals.
+TDM uses a collection of powerful technologies and application code to accomplish its goals. Each sub-header is a link to the associated document.
 
 [[toc]]
 

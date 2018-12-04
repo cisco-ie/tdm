@@ -1,5 +1,5 @@
 # Guides
-These guides attempt to cover common usage scenarios of TDM.
+These guides attempt to cover common usage scenarios of TDM. Each sub-header of this document is a link to the associated document.
 
 [[toc]]
 
