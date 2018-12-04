@@ -1,13 +1,19 @@
 # Overview
 **Welcome to TDM!** This documentation should help you get started being productive with TDM.
 
-[[toc]]
-
-## [Guides](/guides/)
+* **[Guides](/guides/)**  
 If you want to get started using TDM productively, this is where to start.
-
-## [Developer Documentation](/dev/)
+* **[Developer Documentation](/dev/)**  
 If you're interested in programatically using or contributing to TDM, this is where to start.
+
+TDM enables easier exploration and insights into data availability from networking operating systems and platforms, and figuring out equivalent data. For instance, migrating from SNMP OIDs to Model-Driven Telemetry YANG XPaths.
+
+| SNMP OID           | YANG XPath                                                                                                          |
+|--------------------|---------------------------------------------------------------------------------------------------------------------|
+| `bgpLocalAS`       | `Cisco-IOS-XR-ipv4-bgp-oper:bgp/instances/instance/instance-active/default-vrf/global-process-info/global/local-as` |
+| `ifMTU`            | `Cisco-IOS-XR-pfi-im-cmd-oper:interfaces/interface-xr/interface/mtu`                                                |
+| `cdpCacheDeviceId` | `Cisco-IOS-XR-cdp-oper:cdp/nodes/node/neighbors/details/detail/device-id`                                           |
+| ...                | ...                                                                                                                 |
 
 ## Problem
 In its current state, network telemetry can be accessed in many different ways that are not easily reconciled – for instance, finding the same information in SNMP MIBs and NETCONF/YANG modules. Discovering the datapaths is often tedious and somewhat arcane, and there is no way of determining if the information gathered will have the same values, or which is more accurate than another. Further, the operational methods of deploying this monitoring varies across platforms and implementations. This makes networking monitoring a fragmented ecosystem of inconsistent and unverified data. There needs to be manageability, and cross-domain insight into data availability.
