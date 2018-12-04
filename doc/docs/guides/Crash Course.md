@@ -1,5 +1,5 @@
-# TDM Crash Course
-This document aims to rapidly get technical users up to speed on concepts/technologies behind TDM to more effectively understand what is happening and begin developing. This crash course does not cover any information regarding validation, such as how to request the data - only how to go about parsing the data models. This also assumes some level of familiarity with basic terminology such as "CLI".
+# Crash Course
+This document aims to rapidly get technical users up to speed on concepts/technologies behind TDM to more effectively understand what is happening and begin developing. This crash course only briefly covers information regarding validation, such as how to request the data - we primarily focus on broader concepts. This also assumes some level of familiarity with basic terminology such as "CLI".
 
 [[toc]]
 
@@ -94,7 +94,7 @@ rswA6# show ip interface brief | json
 {"TABLE_intf": {"ROW_intf": [{"vrf-name-out": "default", "intf-name": "Vlan62", "proto-state": "up", "link-state": "up", "admin-state": "up", "iod": "2", "prefix": "172.31.156.1", "ip-disabled": "FALSE"}, {"vrf-name-out": "default", "intf-name": "Eth1/29", "proto-state": "up", "link-state": "up", "admin-state": "up", "iod": "36", "prefix": "172.31.1.113", "ip-disabled": "FALSE"}, {"vrf-name-out": "default", "intf-name": "Eth1/30", "proto-state": "up", "link-state": "up", "admin-state": "up", "iod": "37", "prefix": "172.31.1.115", "ip-disabled": "FALSE"}, {"vrf-name-out": "default", "intf-name": "Eth1/31", "proto-state": "up", "link-state": "up", "admin-state": "up", "iod": "38", "prefix": "172.31.1.117", "ip-disabled": "FALSE"}, {"vrf-name-out": "default", "intf-name": "Eth1/32", "proto-state": "up", "link-state": "up", "admin-state": "up", "iod": "39", "prefix": "172.31.1.119", "ip-disabled": "FALSE"}]}}
 ```
 
-This enables, in some cases, for CLI to be easily "indexable" with individual data points. However, it is difficult to define a common "CLI" schema which addresses both structured and unstructured data. This is a yet unsolved problem in TDM - what is our Path schema for CLI? We will not pay a significant amount of attention to it now, and focus on fully structured data models. Individual CLI command buckets, with no attempt to index elements, appears to be the easiest methodology.
+This enables, in some cases, for CLI to be easily "indexable" with individual data points. However, it is difficult to define a common "CLI" schema which addresses both structured and unstructured data. This is a yet unsolved problem in TDM - what is our Path schema for CLI? Individual CLI command buckets, with no attempt to index elements, appears to be the easiest methodology. We will not pay a significant amount of attention to it now, and focus on fully structured data models.
 
 ### MIBs (SNMP)
 [SNMP](https://tools.ietf.org/html/rfc1157) (Simple Network Management Protocol) uses [MIB](https://tools.ietf.org/html/rfc3418)s (Management Information Base) which define [OID](https://tools.ietf.org/html/rfc3061)s (Object Identifier) which are able to be referenced to pull certain points of data from the device. MIBs are written in [SMI](https://tools.ietf.org/html/rfc2578) (Structured Management Information) language, which is derived but different from [ASN.1](https://www.itu.int/ITU-T/studygroups/com17/languages/). SNMP is the "protocol", MIBs are the "models", and SMI is the "modeling language". There are multiple versions of SNMP and SMI which separately have their own capabilities and support - which we are not going to try and think about at the moment. The most widely supported version is SNMPv2 so we are focusing almost explicitly on SNMPv2. SNMP et al. has many revisions and a lot of complexity that we are simply going to gloss over and pretend is totally homogenous. We don't care about its intricacies as long as we're able to consistently retrieve data from a device using a certain representation of the data - which we have in the form of OIDs!
@@ -150,20 +150,20 @@ DME can be explored via `http://<nx-os_ip>/visore.html` on NX-OS devices. In a w
 [ArangoDB](https://arangodb.com/) is a fairly unique database. It accomodates several powerful concepts at once allowing for powerful query capabilities. With a combination of graph, key/value, and document storage - it is possible to execute graph queries which filter on key/values and return documents (as an example). This is not a common capability. For reference, please read the [ArangoDB manual](https://docs.arangodb.com/latest/Manual/).
 
 ### Elasticsearch
-[Elasticsearch](https://www.elastic.co/) provides extremely fast search and analysis capabilities against almost any corpus of data able to be fed into it. Elasticsearch is used for the TDM Web Search feature.
+[Elasticsearch](https://www.elastic.co/) provides extremely fast search and analysis capabilities against almost any corpus of data able to be fed into it. Elasticsearch is used for the Search feature.
 
 ## Learning Resources
 
 ### Videos
-* [Data Modeling Driven Management: Latest Industry and Tool Developments](https://www.youtube.com/watch?v=n_oKGJ_jgYQ)
-  This talk covers YANG and more. Benoit Claise is a very knowledgeable guy when it comes to this stuff.
+* [Data Modeling Driven Management: Latest Industry and Tool Developments](https://www.youtube.com/watch?v=n_oKGJ_jgYQ)  
+This talk covers YANG and more. Benoit Claise is a very knowledgeable guy when it comes to this stuff.
 * [Introduction to SNMP - Simple Network Management Protocol](https://www.youtube.com/watch?v=ZX-XGQoISHQ)
 * [Docker Tutorial - What is Docker & Docker Containers, Images, etc?](https://www.youtube.com/watch?v=pGYAg7TMmp0)
-* [Graph Databases Will Change Your Freakin Life](https://www.youtube.com/watch?v=3vleFxDGoEs)
-  This is a nice introduction to understanding graph databases, and why we might want to use them in this project!
+* [Graph Databases Will Change Your Freakin Life](https://www.youtube.com/watch?v=3vleFxDGoEs)  
+This is a nice introduction to understanding graph databases, and why we might want to use them in this project!
 
 ### xrdocs.github.io
-[xrdocs]((https://xrdocs.github.io/)) is perhaps one of the best resources to learn about Model-Driven Telemetry usage. It details how to gain access to IOS XRv, configure MDT, and use MDT via `pipeline`. This is IOS XR specific, but covers usage of YANG modules which is valuable.
+[xrdocs](https://xrdocs.github.io/) is perhaps one of the best resources to learn about Model-Driven Telemetry usage. It details how to gain access to IOS XRv, configure MDT, and use MDT via `pipeline`. This is IOS XR specific, but covers usage of YANG modules which is valuable.
 
 ### DevNet
 DevNet has a wide range of resources. The Learning Labs are especially useful for hands on activity.
@@ -173,4 +173,4 @@ DevNet has a wide range of resources. The Learning Labs are especially useful fo
 * [Telemetry](https://developer.cisco.com/search/telemetry#)
 
 ### dCloud
-The [Telemetry dCloud lab](https://dcloud2-rtp.cisco.com/content/demo/396115) put together by Marco Umer is very useful in covering the entire range of what can be done with the data. His version 2 is not yet out, but when released is vastly more comprehensive.
+The [Cisco Consuming XR Model Driven Streaming Telemetry Lab v1 dCloud lab](https://dcloud2-sjc.cisco.com/content/demo/49422) put together by Marco Umer is very useful in covering the entire range of what can be done with the data. It is also available publicly at [cisco-ie/telemetry-staging-ansible](https://github.com/cisco-ie/telemetry-staging-ansible).

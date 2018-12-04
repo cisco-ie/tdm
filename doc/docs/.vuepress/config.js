@@ -5,15 +5,30 @@ module.exports = {
     themeConfig: {
       sidebar: [
         '/',
-        '/guides/',
-        '/dev/',
-        '/Contact.md'
+        {
+          title: 'Guides',
+          collapsable: false,
+          children: [
+            '/guides/Crash Course',
+            '/guides/Identifying and Validating Mappings'
+          ]
+        },
+        {
+          title: 'Developer Documentation',
+          collapsable: false,
+          children: [
+            '/dev/architecture/Database',
+            '/dev/architecture/ETL',
+            '/dev/architecture/Search',
+            '/dev/architecture/Web',
+            '/dev/Cool Stuff'
+          ]
+        },
+        '/Contact'
       ],
       nav: [
         { text: 'Overview', link: '/' },
-        { text: 'Guides', link: '/guides/' },
-        { text: 'Developer Documentation', link: '/dev/' },
-        { text: 'Contact', link: '/Contact.md' }
+        { text: 'Contact', link: '/Contact' }
       ]
     }
   }

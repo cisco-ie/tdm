@@ -23,7 +23,7 @@ The ETL process is simply a sequential series of steps right now.
 ### MIBs (SNMP)
 There are actually a lot of missing pieces to the MIB loading into TDM. This is less of a technical issue and more of a business issue which just simply hasn't been addressed. We'll get into that after the basic process.
 
-1) Download all MIBs from ftp://ftp.cisco.com/pub/mibs/v2/
+1) Download all MIBs from `ftp://ftp.cisco.com/pub/mibs/v2/`
 2) Transform MIBs to JSON representation with `pysmi`.
 3) Parse JSON representation into MIB & OID relationships.
 4) Load relationships into TDM as MIB (DataModel) -> OID (DataPath).
