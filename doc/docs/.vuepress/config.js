@@ -3,6 +3,10 @@ module.exports = {
     description: 'Usage and Development Documentation',
     base: '/doc/',
     themeConfig: {
+      repo: 'cisco-ie/tdm/',
+      docsDir: 'doc/docs',
+      editLinks: true,
+      editLinkText: 'Help us improve this page!',
       sidebar: [
         '/',
         {
