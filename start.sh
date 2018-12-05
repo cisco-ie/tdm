@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-./build_images.sh
 COMPOSE_FILE=""
 case "$1" in
     ""|"http")
