@@ -877,7 +877,7 @@ FOR dml IN DataModelLanguage
 ```
 
 ### Search DataPaths per OS/Release/DataModelLanguage/DataModel
-This is a pretty hefty query if not used appropriately. Do not recommend searching just "bgp". This can use up to 32 GB of RAM, but has a relatively constant time-to-return window of 1-45 seconds compared to previous iterations of the query whose upper limits were ambiguously monstrous.
+This is a pretty hefty query if not used appropriately. Do not recommend searching just "bgp". This can use up to 32 GB of RAM, but has a relatively constant time-to-return window of 1-45 seconds compared to previous iterations of the query whose upper limits were indeterminate (never finished).
 
 #### Query
 ```

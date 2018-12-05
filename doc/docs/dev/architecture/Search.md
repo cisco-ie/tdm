@@ -1,10 +1,12 @@
 # Search
-Search in TDM is based off of Elasticsearch. Initial Search using ArangoDB was effective, but extremely latent and resource intensive. Some broad terms resulted in ~60GB memory usage and took nearly a minute to return. In contrast, Elasticsearch returns in fractions of a second and holds at a steady ~1-2GB memory usage.
+Search in TDM is based off of [Elasticsearch](https://www.elastic.co/products/elasticsearch). Initial search using ArangoDB was effective, but extremely latent and resource intensive. Some broad terms resulted in ~60GB memory usage and took nearly a minute to return. In contrast, Elasticsearch returns in fractions of a second and holds at a steady ~1-2GB memory usage.
 
-Elasticsearch is *not* a source-of-truth for TDM. Elasticsearch should always be thought of as a cache of data which could potentially be out-of-sync with the ArangoDB instance of TDM which all other operations use. Elasticsearch is very-specifically a pointed, use-case solution to the original searchability issues.
+[[toc]]
+
+Elasticsearch is *not* a source-of-truth for TDM. Elasticsearch should always be thought of as a cache of data which could potentially be out-of-sync with the ArangoDB instance of TDM which all other operations use. Elasticsearch is very-specifically a point solution to the original searchability issues.
 
 ## Indexing
-Setup the index in ES for our data. Derived from:
+The index for Elasticsearch defines the schema of documents and how inputs should be processed and analyzed. The index was derived from:
 * [Example Python](https://github.com/elastic/elasticsearch-py/blob/master/example/load.py#L17)
 * [Analysis Documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis.html)
 * [Custom Analyzer](https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-custom-analyzer.html)
@@ -124,7 +126,7 @@ This index specifies a custom analyzer and provides the `machine_id` and `human_
 }
 ```
 
-Loading of the data takes every permutation of a DataPath and its OS/Releases and creates a new document per permutation. This is not necessarily the *best* way to go about loading the data, but it was the clearest path forward. This does mean that there is a significant duplication albeit unique/qualified in document.
+Loading of the data takes every permutation of a DataPath and its OS/Releases and creates a new document per permutation. This is not necessarily the *best* way to go about loading the data, but it was the clearest path forward. This does mean that there is a significant duplication albeit unique/qualified in document. If you are familiar with Elasticsearch and have recommendations, please [contact us](/Contact.html).
 
 ## Query
 The Elasticsearch query in its current form performs an aggregation on the DataPath `human_id`. The results are ordered according to relevancy per the scoring of the query. An example query form is presented below.

@@ -1,5 +1,5 @@
 # Overview
-**Welcome to TDM!** This documentation should help you get started being productive with TDM.
+**Welcome to TDM!** This documentation should help you get started being productive.
 
 TDM enables easier exploration and insights into data availability from networking operating systems and platforms, including formal constructs for indicating equivalent data. For instance, migrating from SNMP OIDs to Model-Driven Telemetry YANG XPaths. TDM exists to ease data discovery, correlation, and usage.
 
@@ -16,7 +16,7 @@ In its current state, network telemetry can be accessed in many different ways t
 ## Solution
 TDM seeks to solve this problem by providing a platform to generically access network telemetry and capability purported to be supported by an OS/release or platform, and create relationships between individual datapaths to demonstrate qualities in consistency, validity, and interoperability. This will be both exposed by UI for human usage, and API for automated usage. TDM will not seek to provide domain-specific manageability, but serve as an overlay insight tool.
 
-![TDM UI](/doc/img/index.png)
+![TDM Web UI](/doc/img/index.png)
 
 We are seeking to alleviate two major problems using TDM.
 
