@@ -9,6 +9,7 @@ import json
 import socket
 import errno
 import time
+import argparse
 from urllib.parse import urlparse
 from pyArango.connection import Connection
 from models import create_schema
@@ -44,16 +45,19 @@ def await_url(url, interval=3):
 def create_database(conn):
     """Create the database if it does not exist."""
     db = None
+    created = False
     if conn.hasDatabase('tdm'):
-        db = None
+        db = conn['tdm']
     else:
         db = conn.createDatabase('tdm')
-    return db
+        created = True
+    return created, db
 
 def main():
     """Entry point."""
     logging.basicConfig(level=logging.DEBUG)
     logging.getLogger('urllib3').setLevel(logging.WARNING)
+    args = setup_args()
     logging.info('Loading configuration.')
     config = load_config()
     logging.info('Awaiting DBMS availability.')
@@ -66,8 +70,8 @@ def main():
         except:
             time.sleep(3)
     logging.info('Creating database.')
-    db = create_database(conn)
-    if not db:
+    created, db = create_database(conn)
+    if not created:
         logging.error('TDM database already exists! Not overwriting.')
     else:
         logging.info('Creating database schema.')
@@ -78,10 +82,21 @@ def main():
         populate_snmp(db)
         logging.info('Populating YANG data.')
         populate_yang(db)
+    if created or args.stage == 'etl':
         logging.info('Populating search database with parsed data.')
         populate_search(db)
-        logging.info('ETL process complete!')
+    logging.info('ETL process complete!')
 
+def setup_args():
+    parser = argparse.ArgumentParser(
+        description="TDM ETL"
+    )
+    parser.add_argument('--stage',
+        nargs='?',
+        help='None | etl',
+        default=None
+    )
+    return parser.parse_args()
 
 if __name__ == '__main__':
     main()
