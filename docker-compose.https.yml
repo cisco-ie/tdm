@@ -52,7 +52,7 @@ services:
       - FLASK_ENV=production
     networks:
       - backend
-  doc_build:
+  doc:
     image: tdm/doc
     build: doc/
     volumes:
