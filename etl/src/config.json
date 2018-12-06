@@ -1,7 +1,10 @@
 {
-    "arango": {
+    "dbms": {
         "arangoURL": "http://dbms:8529",
         "username": "root",
         "password": "tdm"
+    },
+    "search": {
+        "searchURL": "http://search:9200"
     }
 }

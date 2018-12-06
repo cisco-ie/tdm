@@ -61,12 +61,12 @@ def main():
     logging.info('Loading configuration.')
     config = load_config()
     logging.info('Awaiting DBMS availability.')
-    await_url(config['arango']['arangoURL'])
+    await_url(config['dbms']['arangoURL'])
     logging.info('Awaiting DBMS connectivity.')
     conn = None
     while conn == None:
         try:
-            conn = Connection(**config['arango'])
+            conn = Connection(**config['dbms'])
         except:
             time.sleep(3)
     logging.info('Creating database.')
@@ -83,8 +83,10 @@ def main():
         logging.info('Populating YANG data.')
         populate_yang(db)
     if created or args.stage == 'search':
+        logging.info('Awaiting Search availability.')
+        await_url(config['search']['searchURL'])
         logging.info('Populating search database with parsed data.')
-        populate_search(db)
+        populate_search(db, config['search']['searchURL'])
     logging.info('ETL process complete!')
 
 def setup_args():
