@@ -8,6 +8,7 @@ volumes:
   nginx_logs:
   goaccess_report:
   search_storage:
+  doc_storage:
 
 secrets:
   ssl_cert:
@@ -32,6 +33,7 @@ services:
       - backend
   etl:
     image: tdm/etl
+    build: etl/
     volumes:
       - type: bind
         source: ./etl/cache/extract
@@ -43,12 +45,20 @@ services:
       - backend
   web:
     image: tdm/web
+    build: web/
     expose:
       - "80"
     environment:
       - FLASK_ENV=production
     networks:
       - backend
+  doc:
+    image: tdm/doc
+    build: doc/
+    volumes:
+    - type: volume
+      source: doc_storage
+      target: /data/docs/.vuepress/dist
   nginx:
     image: nginx:alpine
     ports:
@@ -77,6 +87,10 @@ services:
       - type: volume
         source: goaccess_report
         target: /srv/goaccess
+        read_only: true
+      - type: volume
+        source: doc_storage
+        target: /srv/doc
         read_only: true
       - "./nginx/nginx.https.conf:/etc/nginx/nginx.conf:ro"
     secrets:

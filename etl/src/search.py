@@ -105,7 +105,11 @@ def setup_search_db(es, index):
                         'expand': True,
                         'synonyms': [
                             'optic, transceiver',
-                            'intf, interface, if, int'
+                            'intf, interface, if, int',
+                            'ucast, unicast',
+                            'mcast, multicast',
+                            'pkt, packet',
+                            'in, inbound'
                         ]
                     }
                 }
