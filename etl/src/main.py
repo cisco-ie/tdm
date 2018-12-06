@@ -82,7 +82,7 @@ def main():
         populate_snmp(db)
         logging.info('Populating YANG data.')
         populate_yang(db)
-    if created or args.stage == 'etl':
+    if created or args.stage == 'search':
         logging.info('Populating search database with parsed data.')
         populate_search(db)
     logging.info('ETL process complete!')
@@ -93,7 +93,7 @@ def setup_args():
     )
     parser.add_argument('--stage',
         nargs='?',
-        help='None | etl',
+        help='None | search',
         default=None
     )
     return parser.parse_args()
