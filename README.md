@@ -79,7 +79,7 @@ All ports will be exposed on your Docker host interface. Typically you don't nee
 * Port `5601` exposes Kibana for exploring the TDM Search cache (Elasticsearch).
 
 ## Licensing
-TDM is dual-licensed with [Apache License, Version 2.0](/LICENSE) applying to its softwares and [Community Data License Agreement – Sharing – Version 1.0](/LICENSE-DATA) applying to data.
+TDM is dual-licensed with [Apache License, Version 2.0](/LICENSE) applying to its softwares and [Community Data License Agreement – Sharing – Version 1.0](/LICENSE-DATA) applying to data, such as the mappings.
 
 ## Related Projects
 * [YANG Catalog](https://yangcatalog.org/)
