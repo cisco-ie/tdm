@@ -1,0 +1,11 @@
+.cui .table--wrap td.midvert {
+    vertical-align: middle;
+}
+
+.cui ul.list--highlight > li.list--nohighlight { 
+    pointer-events: none;
+}
+
+.tdm-intro-highlight {
+    background-color: rgba(255, 255, 255, 0.3);
+}
