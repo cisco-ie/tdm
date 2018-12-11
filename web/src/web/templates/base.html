@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='cui-1.2.2-official/css/cui-standard.min.css') }}">
         <link rel="icon" type="image/x-icon" href="https://www.cisco.com/favicon.ico">
         {% block head_includes %}{% endblock %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='tdm.css') }}">
     </head>
     <body class="cui">
         <div class="content-fluid">
@@ -14,48 +15,48 @@
                     <div class="sidebar__header-title">{% block page_header %}Telemetry Data Mapper{% endblock %}</div>
                 </div>
                 <ul>
-                    <li class="sidebar__item">
+                    <li class="sidebar__item" data-step="1" data-position="right" data-intro="This page!">
                         <a href="{{ url_for('index') }}">
                             <span class="icon-home"></span>
                             <span class="half-margin-left">Home</span>
                         </a>
                     </li>
-                    <li class="sidebar__item">
+                    <li class="sidebar__item" data-step="2" data-position="right" data-intro="Use Search to find XPaths, OIDs, whatever you are looking for more easily with keywords!">
                         <a href="{{ url_for('search_es') }}">
                             <span class="icon-search"></span>
                             <span class="half-margin-left">Search</span>
                         </a>
                     </li>
-                    <li class="sidebar__item">
+                    <li class="sidebar__item" data-step="3" data-position="right" data-intro="Matchmaker helps take a list of datapaths like OIDs or XPaths and find what's been mapped as equivalent. Great for upgrading a list of OIDs to XPaths.">
                         <a href="{{ url_for('matchmaker') }}">
                             <span class="icon-intercom-duplex-connected"></span>
                             <span class="half-margin-left">Matchmaker</span>
                         </a>
                     </li>
-                    <li class="sidebar__item">
+                    <li class="sidebar__item" data-step="4" data-position="right" data-intro="Navigate straight to details of a datapath if you already have an OID or XPath you want information on.">
                         <a href="{{ url_for('datapath_direct') }}">
                             <span class="icon-at"></span>
                             <span class="half-margin-left">DataPath Direct</span>
                         </a>
                     </li>
-                    <li class="sidebar__item">
+                    <li class="sidebar__item" data-step="5" data-position="right" data-intro="Pull up all of the datapaths which have mappings associated with them.">
                         <a href="{{ url_for('datapath_matches') }}">
                             <span class="icon-certified"></span>
                             <span class="half-margin-left">All Mappings</span>
                         </a>
                     </li>
-                    <li class="sidebar__item">
+                    <li class="sidebar__item" data-step="6" data-position="right" data-intro="Import spreadsheet-like collections of mappings you've already figured out. Contribute to TDM in bulk!">
                         <a href="{{ url_for('html_map_bulk') }}">
                             <span class="icon-link"></span>
                             <span class="half-margin-left">Import CSV</span>
                         </a>
-                    <li class="sidebar__item">
+                    <li class="sidebar__item" data-step="7" data-position="right" data-intro="Learn more about TDM!">
                         <a href="/doc/" target="_blank">
                             <span class="icon-lightbulb"></span>
                             <span class="half-margin-left">Documentation</span>
                         </a>
                     </li>
-                    <li class="sidebar__item">
+                    <li class="sidebar__item" data-step="8" data-position="right" data-intro="Backup your mappings, or restore/merge mappings from a previous backup.">
                         <a href="{{ url_for('html_map_backup') }}">
                             <span class="icon-animation"></span>
                             <span class="half-margin-left">Backup/Restore</span>

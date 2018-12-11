@@ -24,17 +24,30 @@
                 document.getElementById(collectionName).innerHTML = collectionSize;
             }
         });
+        document.getElementById('tour').addEventListener('click', function() {
+            var intro = introJs();
+            intro.setOptions({
+                highlightClass: 'tdm-introjs-highlight',
+                hidePrev: true,
+                hideNext: true
+            });
+            intro.start();
+        });
     });
 </script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.9.3/introjs.min.css" integrity="sha256-/oZ7h/Jkj6AfibN/zTWrCoba0L+QhP9Tf/ZSgyZJCnY=" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.9.3/intro.min.js" integrity="sha256-fOPHmaamqkHPv4QYGxkiSKm7O/3GAJ4554pQXYleoLo=" crossorigin="anonymous"></script>
 {% endblock %}
 
 {% block content %}
 <div class="row">
-    <div class="hero hero--loose hero--split hero--split-66">
+    <div class="hero hero--regular hero--split hero--split-66">
         <div class="hero__content hero--indigo">
             <div class="container">
                 <h3>Your cornerstone for telemetry.</h3>
-                <p>Data points across protocols are parsed from modeled APIs to create an immutable view of data availability, and mapping capabilities allow for humans or machines to indicate equivalencies e.g. from a NETCONF YANG XPath to an SNMP MIB OID. Search and other functionality is provided as a useful side-effect of these goals. Enjoy!</p>
+                <p>TDM enables easier exploration and insights into data availability from networking operating systems and platforms, including formal constructs for indicating equivalent data. For instance, migrating from SNMP OIDs to Model-Driven Telemetry YANG XPaths. TDM exists to ease data discovery, correlation, and usage. Enjoy!</p>
+                <br>
+                <button class="btn btn--wide btn--primary" id="tour">Take a Tour</button>
             </div>
         </div>
         <div class="hero__marquee hero--background-3 hero--filter-blue"></div>

@@ -161,13 +161,15 @@ function genElement(tag, classList=null, bodyElement=null) {
 <div class="row">
     <div class="col-md-12 panel-group">
         <div class="panel panel--bordered">
-            <div class="row">
-                <div class="col-md-6 panel text-center">
-                    <a class="btn btn--primary btn--wide" href="{{ url_for('api_dump_mappings_native') }}">Backup</a>
-                </div>
-                <div class="col-md-6 panel text-center">
-                    <button id="restore" class="btn btn--primary btn--wide">Restore</button>
-                    <input id="restoreFile" type="file" style="display: none;">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6 panel text-center">
+                        <a class="btn btn--primary btn--wide" href="{{ url_for('api_dump_mappings_native') }}">Backup</a>
+                    </div>
+                    <div class="col-md-6 panel text-center">
+                        <button id="restore" class="btn btn--primary btn--wide">Restore</button>
+                        <input id="restoreFile" type="file" style="display: none;">
+                    </div>
                 </div>
             </div>
         </div>
