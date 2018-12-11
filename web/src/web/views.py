@@ -264,7 +264,7 @@ def matches():
     match_form = forms.MatchForm()
     if not match_form.validate_on_submit():
         return 'Invalid submission!'
-    given_dps = match_form.paths.data.split()
+    given_dps = map(lambda dp: dp.trim('./,'), match_form.paths.data.split())
     if not given_dps:
         return 'Nothing specified to match!'
     matches = fetch_matches(given_dps)
