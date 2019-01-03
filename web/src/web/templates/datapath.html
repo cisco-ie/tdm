@@ -195,7 +195,12 @@ function restoreElement(elementId) {
                             <td class="midvert">
                             {% if datapath_dmls %}
                                 {% for dml in datapath_dmls %}
-                                {{ dml }}{{ ',' if not loop.last }}
+                                    {% if dml == 'YANG' %}
+                                    <a href="https://yangcatalog.org/">{{ dml }}</a>
+                                    {% else %}
+                                    {{ dml }}
+                                    {% endif %}
+                                    {{ ',' if not loop.last }}
                                 {% endfor %}
                             {% else %}
                                 None
@@ -234,8 +239,17 @@ function restoreElement(elementId) {
             </div>
             <div class="divider divider--accent-blue"></div>
             <ul class="list list--inline list--compressed list--highlight">
-                {% for datamodel in datapath_models|sort %}
-                <li style="margin: 3px;"><div class="panel panel--bordered">{{ datamodel }}</div></li>
+                {% for datamodel_name in datapath_models|sort %}
+                {% for datamodel in datapath_models[datamodel_name]|sort(attribute='revision') %}
+                <li style="margin: 3px;">
+                    <div class="panel panel--bordered">
+                        {{ datamodel_name }}{% if datamodel['revision'] %}@{{ datamodel['revision'] }}{% endif %}
+                        {%- if 'YANG' == datamodel['dml'] -%}
+                            &nbsp;|&nbsp;<a href="https://www.yangcatalog.org/yang-search/module_details/?module={{ datamodel_name }}@{{ datamodel['revision'] }}">YC</a>
+                        {%- endif %}
+                    </div>
+                </li>
+                {% endfor %}
                 {% endfor %}
             </ul>
             {% endif %}

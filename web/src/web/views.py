@@ -69,23 +69,23 @@ def datapath_match(_key):
 def datapath_details(_key):
     match_form = forms.DataPathMatchForm()
     datapath_oses = set()
-    datapath_models = set()
     for dp_graph in fetch_datapath_os_graph(_key):
         dp_os = dp_graph['os_name']
         if dp_os:
             if dp_graph['os_release']:
                 dp_os = '%s - %s' % (dp_os, dp_graph['os_release'])
             datapath_oses.add(dp_os)
-        dp_model = dp_graph['datamodel_name']
-        if dp_model:
-            if dp_graph['datamodel_revision']:
-                dp_model = '%s@%s' % (dp_model, dp_graph['datamodel_revision'])
-            datapath_models.add(dp_model)
     datapath_dmls = set()
+    datapath_models = {}
     for dp_graph in fetch_datapath_dml_graph(_key):
         dml_name = dp_graph['dml_name']
         if dml_name:
             datapath_dmls.add(dml_name)
+        datamodel_name = dp_graph['datamodel_name']
+        if datamodel_name:
+            if datamodel_name not in datapath_models.keys():
+                datapath_models[datamodel_name] = []
+            datapath_models[datamodel_name].append({'revision': dp_graph['datamodel_revision'] or '', 'dml': dml_name})
     return flask.render_template('datapath.html',
         datapath=fetch_datapath(_key),
         datapath_models=datapath_models,
@@ -115,7 +115,7 @@ def fetch_datapath_os_graph(_key):
 def fetch_datapath_dml_graph(_key):
     datapath_dml_graph_query = """
     LET datapath = DOCUMENT(CONCAT('DataPath/', @key))
-    FOR v, e, p IN 1..2 INBOUND datapath DataPathFromDataModel, OfDataModelLanguage
+    FOR v, e, p IN 2..2 INBOUND datapath DataPathFromDataModel, OfDataModelLanguage
     RETURN {
         "datamodel_name": p.vertices[1].name,
         "datamodel_revision": p.vertices[1].revision,
