@@ -200,7 +200,12 @@ function restoreElement(elementId) {
                             <td class="midvert">
                             {% if datapath_dmls %}
                                 {% for dml in datapath_dmls %}
-                                {{ dml }}{{ ',' if not loop.last }}
+                                    {% if dml == 'YANG' %}
+                                    <a href="https://yangcatalog.org/">{{ dml }}</a>
+                                    {% else %}
+                                    {{ dml }}
+                                    {% endif %}
+                                    {{ ',' if not loop.last }}
                                 {% endfor %}
                             {% else %}
                                 None
