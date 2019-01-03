@@ -243,7 +243,7 @@ function restoreElement(elementId) {
                 {% for datamodel in datapath_models[datamodel_name]|sort(attribute='revision') %}
                 <li style="margin: 3px;">
                     <div class="panel panel--bordered">
-                        {{ datamodel_name }}@{{ datamodel['revision'] }}
+                        {{ datamodel_name }}{% if datamodel['revision'] %}@{{ datamodel['revision'] }}{% endif %}
                         {%- if 'YANG' == datamodel['dml'] -%}
                             &nbsp;|&nbsp;<a href="https://www.yangcatalog.org/yang-search/module_details/?module={{ datamodel_name }}@{{ datamodel['revision'] }}">YC</a>
                         {%- endif %}
