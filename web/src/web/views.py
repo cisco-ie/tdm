@@ -115,7 +115,7 @@ def fetch_datapath_os_graph(_key):
 def fetch_datapath_dml_graph(_key):
     datapath_dml_graph_query = """
     LET datapath = DOCUMENT(CONCAT('DataPath/', @key))
-    FOR v, e, p IN 1..2 INBOUND datapath DataPathFromDataModel, OfDataModelLanguage
+    FOR v, e, p IN 2..2 INBOUND datapath DataPathFromDataModel, OfDataModelLanguage
     RETURN {
         "datamodel_name": p.vertices[1].name,
         "datamodel_revision": p.vertices[1].revision,
