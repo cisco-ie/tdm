@@ -239,8 +239,17 @@ function restoreElement(elementId) {
             </div>
             <div class="divider divider--accent-blue"></div>
             <ul class="list list--inline list--compressed list--highlight">
-                {% for datamodel in datapath_models|sort %}
-                <li style="margin: 3px;"><div class="panel panel--bordered">{{ datamodel }}</div></li>
+                {% for datamodel_name in datapath_models|sort %}
+                {% for datamodel in datapath_models[datamodel_name]|sort(attribute='revision') %}
+                <li style="margin: 3px;">
+                    <div class="panel panel--bordered">
+                        {{ datamodel_name }}@{{ datamodel['revision'] }}
+                        {%- if 'YANG' == datamodel['dml'] -%}
+                            &nbsp;|&nbsp;<a href="https://www.yangcatalog.org/yang-search/module_details/?module={{ datamodel_name }}@{{ datamodel['revision'] }}">YC</a>
+                        {%- endif %}
+                    </div>
+                </li>
+                {% endfor %}
                 {% endfor %}
             </ul>
             {% endif %}
