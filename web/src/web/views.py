@@ -85,7 +85,7 @@ def datapath_details(_key):
         if datamodel_name:
             if datamodel_name not in datapath_models.keys():
                 datapath_models[datamodel_name] = []
-            datapath_models[datamodel_name].add({'revision': dp_graph['datamodel_revision'] or '', 'dml': dml_name})
+            datapath_models[datamodel_name].insert({'revision': dp_graph['datamodel_revision'] or '', 'dml': dml_name})
     return flask.render_template('datapath.html',
         datapath=fetch_datapath(_key),
         datapath_models=datapath_models,
