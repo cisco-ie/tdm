@@ -81,8 +81,8 @@ class YANGBase:
         for child in module_children:
             attr_dict = {
                 'base_module': base_module.arg,
-                'xpath': yang_parser.get_xpath(child, with_prefixes=True),
-                'cisco_xpath': yang_parser.get_cisco_xpath(child, base_module),
+                'qualified_xpath': yang_parser.get_xpath(child, qualified=True, prefix_to_module=True),
+                'xpath': yang_parser.get_xpath(child, prefix_to_module=True),
                 'type': yang_parser.get_qualified_type(child),
                 'primitive_type': yang_parser.get_primitive_type(child),
                 'rw': True if getattr(child, 'i_config', False) else False,

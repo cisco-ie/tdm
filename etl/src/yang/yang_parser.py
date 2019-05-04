@@ -93,31 +93,64 @@ def get_filtered_modules(context, filter_pattern):
         filtered_modules[module_name] = revs
     return filtered_modules
 
-def get_cisco_xpath(module, base_module):
-    """Generate the Cisco XPath representation.
-    Cleaner but less absolute.
+def mk_path_list(stmt):
+    """Derives a list of tuples containing
+    (module name, prefix, xpath)
+    per node in the statement.
     """
-    module_name = base_module.arg
-    no_prefix_xpath = get_xpath(module, with_prefixes=False)
-    cisco_xpath = '%s:%s' % (module_name, no_prefix_xpath[1:])
-    return cisco_xpath
-
-def mk_path_str(stmt, with_prefixes=False):
-    """Returns the XPath path of the node"""
-    if stmt.keyword in ['choice', 'case']:
-        return mk_path_str(stmt.parent, with_prefixes)
-    def name(stmt):
-        if with_prefixes:
-            return '%s:%s' % (stmt.i_module.i_prefix, stmt.arg)
+    resolved_names = []
+    def resolve_stmt(stmt, resolved_names):
+        if stmt.keyword in ['choice', 'case']:
+            resolve_stmt(stmt.parent, resolved_names)
+            return
+        def qualified_name_elements(stmt):
+            """(module name, prefix, name)"""
+            return (stmt.i_module.arg, stmt.i_module.i_prefix, stmt.arg)
+        if stmt.parent.keyword in ['module', 'submodule']:
+            resolved_names.append(qualified_name_elements(stmt))
+            return
         else:
-            return stmt.arg
-    if stmt.parent.keyword in ['module', 'submodule']:
-        return '/%s' % name(stmt)
-    else:
-        xpath = mk_path_str(stmt.parent, with_prefixes)
-        return '%s/%s' % (xpath, name(stmt))
+            resolve_stmt(stmt.parent, resolved_names)
+            resolved_names.append(qualified_name_elements(stmt))
+            return
+    resolve_stmt(stmt, resolved_names)
+    return resolved_names
 
-get_xpath = mk_path_str
+def mk_path_str(stmt, with_prefixes=False, prefix_onchange=False, prefix_to_module=False, resolve_top_prefix_to_module=False):
+    """Returns the XPath path of the node.
+    with_prefixes indicates whether or not to prefix every node.
+    prefix_onchange modifies the behavior of with_prefixes and only adds prefixes when the prefix changes mid-XPath.
+    prefix_to_module replaces prefixes with the module name of the prefix.
+    resolve_top_prefix_to_module resolves the module-level prefix to the module name.
+    Prefixes may be included in the path if the prefix changes mid-path.
+    """
+    resolved_names = mk_path_list(stmt)
+    xpath_elements = []
+    last_prefix = None
+    for index, resolved_name in enumerate(resolved_names):
+        module_name, prefix, node_name = resolved_name
+        xpath_element = node_name
+        if with_prefixes or (prefix_onchange and prefix != last_prefix):
+            new_prefix = prefix
+            if prefix_to_module or (index == 0 and resolve_top_prefix_to_module):
+                new_prefix = module_name
+            xpath_element = '%s:%s' % (new_prefix, node_name)
+        xpath_elements.append(xpath_element)
+        last_prefix = prefix
+    return '/%s' % '/'.join(xpath_elements)
+
+def get_xpath(stmt, qualified=False, prefix_to_module=False):
+    """Gets the XPath of the statement.
+    Unless qualified=True, does not include prefixes unless the prefix changes mid-XPath.
+    qualified will add a prefix to each node.
+    prefix_to_module will resolve prefixes to module names instead.
+    For RFC 8040, set prefix_to_module=True.
+    /prefix:root/node/prefix:node/...
+    qualified=True: /prefix:root/prefix:node/prefix:node/...
+    qualified=True, prefix_to_module=True: /module:root/module:node/module:node/...
+    prefix_to_module=True: /module:root/node/module:node/...
+    """
+    return mk_path_str(stmt, with_prefixes=qualified, prefix_onchange=True, prefix_to_module=prefix_to_module)
 
 def get_type(stmt):
     """Gets the immediate, top-level type of the node.
