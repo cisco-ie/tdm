@@ -97,7 +97,7 @@ def acquire_source():
         os.system('cd %s && git pull' % yang_base_path)
     else:
         logging.debug('Cloning YANG repo for first time.')
-        os.system('cd %s && git clone --recursive https://github.com/YangModels/yang.git' % base_path)
+        os.system('cd %s && git clone --recursive https://github.com/cisco-ie/yang.git -b fix-ietf-types-cisco' % base_path)
         logging.debug('Cloned to %s.', yang_base_path)
     return cisco_yang_base_path
 
