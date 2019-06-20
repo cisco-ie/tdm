@@ -50,15 +50,15 @@ def query_all_datapaths(db):
                     "dml_name": p.vertices[2].name
                 }
                 LET dp_ext = (
-                    FOR _v, _e, _p IN 2..2 INBOUND p.vertices[1] ReleaseHasDataModel, OSHasRelease
+                    FOR subv, sube, subp IN 2..2 INBOUND p.vertices[1] ReleaseHasDataModel, OSHasRelease
                         RETURN {
-                            "dm_key": _p.vertices[0]._key,
-                            "dm_name": _p.vertices[0].name,
-                            "dm_revision": _p.vertices[0].revision,
-                            "release_key": _p.vertices[1]._key,
-                            "release_name": _p.vertices[1].name,
-                            "os_key": _p.vertices[2]._key,
-                            "os_name": _p.vertices[2].name
+                            "dm_key": subp.vertices[0]._key,
+                            "dm_name": subp.vertices[0].name,
+                            "dm_revision": subp.vertices[0].revision,
+                            "release_key": subp.vertices[1]._key,
+                            "release_name": subp.vertices[1].name,
+                            "os_key": subp.vertices[2]._key,
+                            "os_name": subp.vertices[2].name
                         }
                 )
                 RETURN LENGTH(dp_ext) != 0 ? (FOR ext IN dp_ext RETURN MERGE(dp_min, ext)) : dp_min
