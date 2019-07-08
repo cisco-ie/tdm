@@ -43,9 +43,9 @@ os_version_folder_map = {
         '9.2(3)': '9.2-3'
     },
     'xe': {
-#        '16.3.1': '1631',
-#        '16.3.2': '1632',
-#        '16.4.1': '1641',
+        '16.3.1': '1631',
+        '16.3.2': '1632',
+        '16.4.1': '1641',
         '16.5.1': '1651',
         '16.6.1': '1661',
         '16.6.2': '1662',
@@ -55,23 +55,23 @@ os_version_folder_map = {
         '16.9.3': '1693'
     },
     'xr': {
-#        '5.3.0': '530',
-#        '5.3.1': '531',
-#        '5.3.2': '532',
-#        '5.3.3': '533',
-#        '5.3.4': '534',
-#        '6.0.0': '600',
-#        '6.0.1': '601',
+        '5.3.0': '530',
+        '5.3.1': '531',
+        '5.3.2': '532',
+        '5.3.3': '533',
+        '5.3.4': '534',
+        '6.0.0': '600',
+        '6.0.1': '601',
         '6.0.2': '602',
-#        '6.1.1': '611',
+        '6.1.1': '611',
         '6.1.2': '612',
         '6.1.3': '613',
         '6.2.1': '621',
         '6.2.2': '622',
         '6.3.1': '631',
-#        '6.3.2': '632',
-#        '6.4.1': '641',
-#        '6.4.2': '642',
+        '6.3.2': '632',
+        '6.4.1': '641',
+        '6.4.2': '642',
         '6.5.1': '651'
     }
 }
@@ -97,7 +97,7 @@ def acquire_source():
         os.system('cd %s && git pull' % yang_base_path)
     else:
         logging.debug('Cloning YANG repo for first time.')
-        os.system('cd %s && git clone --recursive https://github.com/YangModels/yang.git' % base_path)
+        os.system('cd %s && git clone --recursive https://github.com/cisco-ie/yang.git -b fix-ietf-types-cisco' % base_path)
         logging.debug('Cloned to %s.', yang_base_path)
     return cisco_yang_base_path
 
