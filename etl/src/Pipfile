@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 pyArango-upstream = {git = "https://github.com/tariqdaouda/pyArango.git", ref = "master"}
-pyang = "*"
+pyang = "==1.7.5"
 pysmi = "*"
 elasticsearch = "*"
 
