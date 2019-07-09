@@ -1248,7 +1248,7 @@ def machine_id_to_module_prefixed_no_top_slash(machine_id):
     """Reformats the machine_id to module prefixed specification.
     openconfig-acl:acl/openconfig-acl:state
     """
-    return machine_id_extract_xpath(machine_id, with_module=True)[1:]
+    return machine_id_to_module_prefixed(machine_id)[1:]
 
 def machine_id_extract_xpath(machine_id, with_module=True):
     xpath_elements = machine_id.split('/')
