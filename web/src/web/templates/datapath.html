@@ -159,7 +159,7 @@ function restoreElement(elementId) {
                         {% if 'YANG' in datapath_dmls %}
                         <tr>
                             <th>RFC 8040 XPath</th>
-                            <td class="midvert">{{ datapath['machine_id']|machine_id_to_8040 }}</td>
+                            <td class="midvert">{{ datapath['human_id'] }}</td>
                         </tr>
                         {% if 'IOS XE' in datapath_oses|join %}
                         <tr>
@@ -170,7 +170,13 @@ function restoreElement(elementId) {
                         {% if 'IOS XR' in datapath_oses|join %}
                         <tr>
                             <th>IOS XR XPath</th>
-                            <td class="midvert">{{ datapath['human_id'] }}</td>
+                            <td class="midvert">{{ datapath['machine_id']|machine_id_to_module_prefixed_no_top_slash }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if 'NX-OS' in datapath_oses|join %}
+                        <tr>
+                            <th>NX-OS XPath</th>
+                            <td class="midvert">{{ datapath['machine_id']|machine_id_to_module_prefixed_no_top_slash }}</td>
                         </tr>
                         {% endif %}
                         {% endif %}
