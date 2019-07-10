@@ -1250,15 +1250,21 @@ def machine_id_to_module_prefixed_no_top_slash(machine_id):
     """
     return machine_id_to_module_prefixed(machine_id)[1:]
 
-def machine_id_extract_xpath(machine_id, with_module=True):
+def machine_id_extract_xpath(machine_id, with_module=True, fully_qualified=False):
     xpath_elements = machine_id.split('/')
     xpath_prefixed_elements = []
+    running_prefix = None
     for element in xpath_elements:
         if not element:
             xpath_prefixed_elements.append('')
             continue
         module, prefix, name = element.split(':')
-        xpath_prefixed_elements.append('%s:%s' % (module if with_module else prefix, name))
+        desired_prefix = module if with_module else prefix
+        if desired_prefix == running_prefix and not fully_qualified:
+            xpath_prefixed_elements.append(name)
+        else:
+            xpath_prefixed_elements.append('%s:%s' % (desired_prefix, name))
+            running_prefix = desired_prefix
     return '/'.join(xpath_prefixed_elements)
 
 app.jinja_env.filters['machine_id_to_prefixed'] = machine_id_to_prefixed
