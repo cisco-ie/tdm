@@ -1255,6 +1255,7 @@ def machine_id_extract_xpath(machine_id, with_module=True):
     xpath_prefixed_elements = []
     for element in xpath_elements:
         if not element:
+            xpath_prefixed_elements.append('')
             continue
         module, prefix, name = element.split(':')
         xpath_prefixed_elements.append('%s:%s' % (module if with_module else prefix, name))
