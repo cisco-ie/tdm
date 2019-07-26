@@ -1,0 +1,2 @@
+# v1.x to 2.0
+This migration is purely for migrating mappings within TDM from v1.x to v2.0 format. v2.0 expresses both modules and prefixes in the `machine_id` and breaks v1.x mapping portability. This script will translate v1.x mapping `machine_id` fields to the v2.x format.

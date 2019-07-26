@@ -61,15 +61,14 @@ class YANGBase:
             for module_key, module_revision in modules.items():
                 module_data = version_data[module_key] = {}
                 for revision_key, module in module_revision.items():
-                    module_data[revision_key] = self.parse_module_oper_attrs(module, module)
+                    module_data[revision_key] = self.parse_module_oper_attrs(module)
                 logging.debug('Parsed %d revision(s) for %s.', len(module_data.keys()), module_key)
             logging.debug('Parsed %d module(s) for %s.', len(version_data.keys()), version)
         logging.debug('Parsed %d version(s).', len(version_module_map.keys()))
         return version_module_map
 
-    def parse_module_oper_attrs(self, module, base_module):
+    def parse_module_oper_attrs(self, module):
         """Parse out the readable DataPaths from parsed data models.
-        TODO: Validate the i_config filtering with pyang.
         """
         if not hasattr(module, 'i_children'):
             return {}
@@ -80,19 +79,14 @@ class YANGBase:
         parsed_modules = {}
         for child in module_children:
             attr_dict = {
-                'base_module': base_module.arg,
-                'xpath': yang_parser.get_xpath(child, with_prefixes=True),
-                'cisco_xpath': yang_parser.get_cisco_xpath(child, base_module),
+                'machine_id': '/%s' % ('/'.join(map(lambda x: ':'.join(x), yang_parser.mk_path_list(child)))),
+                'qualified_xpath': yang_parser.get_xpath(child, qualified=True, prefix_to_module=True),
+                'xpath': yang_parser.get_xpath(child, prefix_to_module=True),
                 'type': yang_parser.get_qualified_type(child),
                 'primitive_type': yang_parser.get_primitive_type(child),
                 'rw': True if getattr(child, 'i_config', False) else False,
                 'description': yang_parser.get_description(child),
-                'children': self.parse_module_oper_attrs(child, base_module)
+                'children': self.parse_module_oper_attrs(child)
             }
-            # Qualify based on module and xpath, not cisco_xpath.
-            # Would not account for derivation/augmentations.
-            parsed_modules[str((
-                attr_dict['base_module'],
-                attr_dict['xpath']
-            ))] = attr_dict
+            parsed_modules[attr_dict['machine_id']] = attr_dict
         return parsed_modules

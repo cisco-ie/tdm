@@ -161,17 +161,14 @@ def add_version_modules(db, os_key, version, modules):
 def add_data_paths_to_dm(db, dm_node, module, dp_parent=None):
     """Add the parsed DataPaths from the corresponding DataModels."""
     for _, path_data in module.items():
-        path_key = '%s%s' % (
-            path_data['base_module'],
-            path_data['xpath']
-        )
+        path_key = path_data['machine_id']
         path_node = None
         if path_key in dp_cache.keys():
             path_node = dp_cache[path_key]
         else:
             path_node = db['DataPath'].createDocument({
                 'machine_id': path_key,
-                'human_id': path_data['cisco_xpath'],
+                'human_id': path_data['xpath'],
                 'description': path_data['description'],
                 'is_leaf': False if path_data['children'] else True,
                 'is_variable': False,

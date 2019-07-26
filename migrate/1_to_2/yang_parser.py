@@ -152,6 +152,21 @@ def get_xpath(stmt, qualified=False, prefix_to_module=False):
     """
     return mk_path_str(stmt, with_prefixes=qualified, prefix_onchange=True, prefix_to_module=prefix_to_module)
 
+def old_get_xpath(stmt, with_prefixes=False):
+    """Returns the XPath path of the node"""
+    if stmt.keyword in ['choice', 'case']:
+        return mk_path_str(stmt.parent, with_prefixes)
+    def name(stmt):
+        if with_prefixes:
+            return '%s:%s' % (stmt.i_module.i_prefix, stmt.arg)
+        else:
+            return stmt.arg
+    if stmt.parent.keyword in ['module', 'submodule']:
+        return '/%s' % name(stmt)
+    else:
+        xpath = mk_path_str(stmt.parent, with_prefixes)
+        return '%s/%s' % (xpath, name(stmt))
+
 def get_type(stmt):
     """Gets the immediate, top-level type of the node.
     TODO: Add get_prefixed_type method to get prefixed types.

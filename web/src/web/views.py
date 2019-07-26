@@ -1231,37 +1231,43 @@ def query_db(query, bind_vars=None, unlist=True):
     return return_elements
 
 """Ugly Jinja2 bandaid for XPath issues."""
-def machine_id_to_8040(value):
-    """Reformats the machine_id bastardized XPath to RFC 8040 compliance."""
-    xpath_elements = value.split('/')
-    module = xpath_elements[0]
-    prefixed_elements = xpath_elements[1:]
-    initial_prefix = prefixed_elements[0].split(':')[0]
-    adjusted_elements = ['']
-    for index, element in enumerate(prefixed_elements):
-        prefix, element = element.split(':')
-        if prefix == initial_prefix:
-            adjusted_elements.append('%s:%s' % (module, element))
-        else:
-            adjusted_elements.extend(prefixed_elements[index:])
-            break
-    return machine_id_to_prefixed('/'.join(adjusted_elements))
 
-def machine_id_to_prefixed(value):
-    """Reformats the machine_id to simplified prefixed specification."""
-    qualified_xpath = value[value.index('/'):]
-    xpath_elements = qualified_xpath.split('/')[1:]
+def machine_id_to_prefixed(machine_id):
+    """Reformats the machine_id to prefixed specification.
+    /oc-acl:acl/oc-acl:state
+    """
+    return machine_id_extract_xpath(machine_id, with_module=False)
+
+def machine_id_to_module_prefixed(machine_id):
+    """Reformats the machine_id to module prefixed specification.
+    /openconfig-acl:acl/openconfig-acl:state
+    """
+    return machine_id_extract_xpath(machine_id, with_module=True)
+
+def machine_id_to_module_prefixed_no_top_slash(machine_id):
+    """Reformats the machine_id to module prefixed specification.
+    openconfig-acl:acl/openconfig-acl:state
+    """
+    return machine_id_to_module_prefixed(machine_id)[1:]
+
+def machine_id_extract_xpath(machine_id, with_module=True, fully_qualified=False):
+    xpath_elements = machine_id.split('/')
+    xpath_prefixed_elements = []
     running_prefix = None
-    xpath_prefixed_elements = ['']
-    for qualified_element in xpath_elements:
-        prefix, element = qualified_element.split(':')
-        if prefix == running_prefix:
-            xpath_prefixed_elements.append(element)
+    for element in xpath_elements:
+        if not element:
+            xpath_prefixed_elements.append('')
+            continue
+        module, prefix, name = element.split(':')
+        desired_prefix = module if with_module else prefix
+        if desired_prefix == running_prefix and not fully_qualified:
+            xpath_prefixed_elements.append(name)
         else:
-            xpath_prefixed_elements.append('%s:%s' % (prefix, element))
-            running_prefix = prefix
+            xpath_prefixed_elements.append('%s:%s' % (desired_prefix, name))
+            running_prefix = desired_prefix
     return '/'.join(xpath_prefixed_elements)
 
-app.jinja_env.filters['machine_id_to_8040'] = machine_id_to_8040
 app.jinja_env.filters['machine_id_to_prefixed'] = machine_id_to_prefixed
+app.jinja_env.filters['machine_id_to_module_prefixed'] = machine_id_to_module_prefixed
+app.jinja_env.filters['machine_id_to_module_prefixed_no_top_slash'] = machine_id_to_module_prefixed_no_top_slash
 """End bandaid."""
