@@ -36,33 +36,31 @@ def query_all_datapaths(db):
     2 stage query due to not all DataPaths being linked to OS/Releases (OIDs).
     """
     query = """
-    RETURN FLATTEN(
-        FOR dp IN DataPath
-            FOR v, e, p IN 2..2 INBOUND dp DataPathFromDataModel, OfDataModelLanguage
-                LET dp_min = {
-                    "dp_key": p.vertices[0]._key,
-                    "dp_machine_id": p.vertices[0].machine_id,
-                    "dp_human_id": p.vertices[0].human_id,
-                    "dp_description": p.vertices[0].description,
-                    "dp_is_leaf": p.vertices[0].is_leaf,
-                    "dp_is_configurable": p.vertices[0].is_configurable,
-                    "dml_key": p.vertices[2]._key,
-                    "dml_name": p.vertices[2].name
-                }
-                LET dp_ext = (
-                    FOR subv, sube, subp IN 2..2 INBOUND p.vertices[1] ReleaseHasDataModel, OSHasRelease
-                        RETURN {
-                            "dm_key": subp.vertices[0]._key,
-                            "dm_name": subp.vertices[0].name,
-                            "dm_revision": subp.vertices[0].revision,
-                            "release_key": subp.vertices[1]._key,
-                            "release_name": subp.vertices[1].name,
-                            "os_key": subp.vertices[2]._key,
-                            "os_name": subp.vertices[2].name
-                        }
-                )
-                RETURN LENGTH(dp_ext) != 0 ? (FOR ext IN dp_ext RETURN MERGE(dp_min, ext)) : dp_min
-    )
+    FOR dp IN DataPath
+        FOR v, e, p IN 2..2 INBOUND dp DataPathFromDataModel, OfDataModelLanguage
+            LET dp_min = {
+                "dp_key": p.vertices[0]._key,
+                "dp_machine_id": p.vertices[0].machine_id,
+                "dp_human_id": p.vertices[0].human_id,
+                "dp_description": p.vertices[0].description,
+                "dp_is_leaf": p.vertices[0].is_leaf,
+                "dp_is_configurable": p.vertices[0].is_configurable,
+                "dml_key": p.vertices[2]._key,
+                "dml_name": p.vertices[2].name
+            }
+            LET dp_ext = (
+                FOR subv, sube, subp IN 2..2 INBOUND p.vertices[1] ReleaseHasDataModel, OSHasRelease
+                    RETURN {
+                        "dm_key": subp.vertices[0]._key,
+                        "dm_name": subp.vertices[0].name,
+                        "dm_revision": subp.vertices[0].revision,
+                        "release_key": subp.vertices[1]._key,
+                        "release_name": subp.vertices[1].name,
+                        "os_key": subp.vertices[2]._key,
+                        "os_name": subp.vertices[2].name
+                    }
+            )
+            RETURN LENGTH(dp_ext) != 0 ? (FOR ext IN dp_ext RETURN MERGE(dp_min, ext)) : dp_min
     """
     return db.AQLQuery(query, rawResults=True, batchSize=1000)
 
@@ -170,14 +168,11 @@ def populate_search_db(es, query_iterable, index, doc_type):
         """We need to add a uid before insertion (I think).
         Every example seen has an _id property in the struct.
         """
-        counter = 0
-        for result in iterable:
-            if not isinstance(result, (list,)):
-                logging.error('Expected result to be list in iterable!')
-            for element in result:
-                element['_id'] = counter
-                counter += 1
-                yield element
+        id_counter = 0
+        for element in iterable:
+            element['_id'] = id_counter
+            id_counter += 1
+            yield element
     for ok, result in streaming_bulk(
             es,
             iter_add_id(query_iterable),
