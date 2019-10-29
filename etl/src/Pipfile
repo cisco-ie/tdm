@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pyArango-upstream = {git = "https://github.com/tariqdaouda/pyArango.git", ref = "master"}
+pyArango = "*"
 pyang = "==1.7.5"
 pysmi = "*"
 elasticsearch = "*"
