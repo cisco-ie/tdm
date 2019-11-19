@@ -100,7 +100,7 @@ services:
         target: tdm.cisco.com.key
   goaccess:
     image: allinurl/goaccess:latest
-    command: sh -c "while true; do goaccess --no-global-config --config-file=/srv/data/web.conf && goaccess --no-global-config --config-file=/srv/data/dbms.conf && goaccess --no-global-config --config-file=/srv/data/kibana.conf; sleep 60; done"
+    entrypoint: sh -c "while true; do goaccess --no-global-config --config-file=/srv/data/web.conf && goaccess --no-global-config --config-file=/srv/data/dbms.conf && goaccess --no-global-config --config-file=/srv/data/kibana.conf; sleep 60; done"
     networks:
       - backend
     volumes:
