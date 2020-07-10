@@ -25,6 +25,8 @@ from werkzeug.utils import secure_filename
 from . import forms
 from . import app
 
+ARANGO_PORT = 8529
+
 @app.route('/')
 def index():
     return flask.render_template('index.html')
@@ -959,7 +961,7 @@ def map_datapath_calculation_single(name, description, equation, author, InCalcu
         calc_result_doc = check_collection_fields('DataPath', check_fields, calc_result)
         if calc_result_doc is not None:
             calculation_result_ids.add(calc_result_doc.next()['_id'])
-    client = ArangoClient(protocol='http', host='dbms')
+    client = ArangoClient(hosts='http://dbms:{}'.format(ARANGO_PORT))
     db = client.db('tdm', username='root', password='tdm')
     calculation_collection = db.collection('Calculation')
     calculation_exists = calculation_collection.find({'name': name})
@@ -1032,7 +1034,7 @@ def map_datapath_single_by_key(basepath_key, matchpath_key, author, weight, anno
     matchpath = fetch_datapath(matchpath_key)
     if not matchpath:
         raise Exception('Specified matching DataPath not found!')
-    client = ArangoClient(protocol='http', host='dbms')
+    client = ArangoClient(hosts='http://dbms:{}'.format(ARANGO_PORT))
     db = client.db('tdm', username='root', password='tdm')
     datapath_matches = db.collection('DataPathMatch')
     datapath_match_exist = datapath_matches.find({'_from': basepath['_id'], '_to': matchpath['_id']})
@@ -1057,7 +1059,7 @@ def map_datapath_single_by_key(basepath_key, matchpath_key, author, weight, anno
 
 def check_collection_fields(collection, fields, value, return_single=True, db=None):
     if db is None:
-        client = ArangoClient(protocol='http', host='dbms')
+        client = ArangoClient(hosts='http://dbms:{}'.format(ARANGO_PORT))
         db = client.db('tdm', username='root', password='tdm')
     collection_ref = db.collection(collection)
     return_val = None
@@ -1077,7 +1079,7 @@ def check_collection_fields(collection, fields, value, return_single=True, db=No
 
 def add_mapping(edge_collection, from_id, to_id, body=None, check_bidirectional=True, db=None):
     if db is None:
-        client = ArangoClient(protocol='http', host='dbms')
+        client = ArangoClient(hosts='http://dbms:{}'.format(ARANGO_PORT))
         db = client.db('tdm', username='root', password='tdm')
     collection_ref = db.collection(edge_collection)
     mapping = collection_ref.find({'_from': from_id, '_to': to_id})
@@ -1221,7 +1223,7 @@ def fetch_dump_mappings():
 
 def query_db(query, bind_vars=None, unlist=True):
     """Generically query database."""
-    client = ArangoClient(protocol='http', host='dbms')
+    client = ArangoClient(hosts='http://dbms:{}'.format(ARANGO_PORT))
     db = client.db('tdm', username='root',password='tdm')
     cursor = db.aql.execute(query, bind_vars=bind_vars)
     # TODO: Pass as generator instead of fill array
