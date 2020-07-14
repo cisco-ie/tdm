@@ -12,3 +12,5 @@ case "$1" in
         exit 1
 esac
 docker-compose -f $COMPOSE_FILE down --rmi all --volumes
+sudo rm -rf ../etl/cache/transform/*
+sudo rm -rf ../etl/cache/extract/*
