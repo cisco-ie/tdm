@@ -12,6 +12,7 @@ python-arango = "*"
 flask-wtf = "*"
 elasticsearch = "*"
 gevent = "*"
+email_validator = "*"
 
 
 [dev-packages]
