@@ -182,7 +182,8 @@ def populate_search_db(es, query_iterable, index, doc_type):
             es,
             iter_add_id(query_iterable),
             index=index,
-            doc_type=doc_type
+            doc_type=doc_type,
+            request_timeout=None
         ):
         action, result = result.popitem()
         doc_id = '/%s/%s/%s' % (index, doc_type, result['_id'])
